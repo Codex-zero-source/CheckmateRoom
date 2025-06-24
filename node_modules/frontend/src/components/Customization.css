@@ -1,0 +1,55 @@
+.customization-panel {
+    background-color: var(--component-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.customization-panel h4 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.theme-options {
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-options button {
+    flex-grow: 1;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.theme-options button:hover {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.piece-set-options {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.piece-set-options button {
+    flex-grow: 1;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.piece-set-options button:hover {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+} 

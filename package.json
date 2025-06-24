@@ -1,0 +1,25 @@
+{
+  "name": "ChessXCrypto",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A chess dApp on Avalanche to earn tokens by playing, learning, and interacting.",
+  "scripts": {
+    "start:frontend": "npm run --workspace=frontend dev",
+    "start:backend": "npm run --workspace=backend dev",
+    "compile:contracts": "npm run --workspace=contracts compile",
+    "test:contracts": "npm run --workspace=contracts test"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "keywords": [
+    "chess",
+    "dapp",
+    "web3",
+    "avalanche",
+    "react",
+    "solidity"
+  ],
+  "author": "",
+  "license": "MIT"
+} 

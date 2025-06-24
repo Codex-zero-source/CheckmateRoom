@@ -1,0 +1,40 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--primary-color);
+}
+
+.navbar-brand a {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-decoration: none;
+    letter-spacing: 2px;
+    font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.navbar-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-bottom-color 0.3s;
+}
+
+.navbar-links a:hover {
+    color: var(--primary-color);
+}
+
+.navbar-links a.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+} 
