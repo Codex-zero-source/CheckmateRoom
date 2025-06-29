@@ -6,146 +6,236 @@ interface GameState {
   moveCount: number;
 }
 
-class GamblerPersonality {
-  private greetings = [
-    "Hey there, champ! Ready to make some REAL money today? 💰",
-    "Welcome to the big leagues, player! The house always wins... or do they? 😏",
-    "Ah, a fresh face! I can smell the potential for profit from here! 🎰",
-    "Well well well, look who's here to test their luck! Let's make some magic happen! ✨",
-    "Yo! You look like someone who knows how to play the game. Ready to double down? 🃏"
+interface PuzzleState {
+  isActive: boolean;
+  currentPuzzle: any;
+  difficulty: string;
+  moveIndex: number;
+  totalMoves: number;
+  timeSpent: number;
+  success: boolean;
+}
+
+class HousePersonality {
+  // The House greetings - combining gambling and theatrical elements
+  private houseGreetings = [
+    "Welcome to The House, player! Where fortunes are made and legends are born! 🏛️",
+    "Step into The House, where every move could be your last... or your greatest! 🎭",
+    "Ah, a new challenger enters The House! Let's see what you're made of! ⚡",
+    "The House always wins... but maybe today is your lucky day! 🎰",
+    "Welcome to the grand stage of The House! The game is about to begin! 🎪"
   ];
 
-  private gameStartMessages = [
-    "The game is ON! I can feel the tension in the air... and the smell of opportunity! 🎯",
-    "Here we go! Time to separate the winners from the... well, let's just say the others! 😈",
-    "The board is set, the pieces are moving, and the stakes are calling your name! 🎲",
-    "Game time! Remember, fortune favors the bold... and the ones who bet big! 💪",
-    "Let the games begin! I've got a feeling this is going to be EPIC! 🔥"
+  private houseGameStartMessages = [
+    "The House is ready! The board is set, the stakes are high, and the game is ON! 🔥",
+    "Let the games begin! The House is watching, and the tension is palpable! ⚡",
+    "The stage is set in The House! Time to separate the winners from the rest! 🎯",
+    "The House is alive with anticipation! Let's make some magic happen! ✨",
+    "The game is afoot in The House! Every move counts, every bet matters! 💎"
   ];
 
-  private stakesChangeMessages = [
-    "Now THAT'S what I'm talking about! Real money on the line! 🎰",
-    "The pot is getting juicier by the minute! Are you in or are you out? 💰",
-    "Stakes are rising! This is where legends are made, my friend! ⚡",
-    "I love the smell of fresh bets in the morning! Let's make it rain! 🌧️",
-    "The higher the stakes, the sweeter the victory! Time to go big or go home! 🚀"
+  // Puzzle-specific messages
+  private puzzleStartMessages = [
+    "The House presents you with a challenge! Can you solve this puzzle? 🧩",
+    "A puzzle from The House! Time to put that brain to the ultimate test! 🧠",
+    "The House has prepared a special challenge for you! Ready to accept? 🎯",
+    "A puzzle awaits in The House! This is where legends are forged! ⚔️",
+    "The House challenges you with this puzzle! Prove your worth! 💪"
   ];
 
-  private encouragementMessages = [
-    "You're on fire! Keep that momentum going and let's see some REAL action! 🔥",
-    "This is your moment! Don't let it slip away - double down and show them who's boss! 💪",
-    "I can feel it in my bones - this is going to be HUGE! Time to make some moves! ⚡",
-    "The game is heating up! Are you ready to make history or just watch from the sidelines? 🎯",
-    "This is what we live for! The thrill, the risk, the REWARD! Let's make it count! 🎰"
+  private puzzleHintMessages = [
+    "The House offers you a hint: think outside the box! 📦",
+    "The House suggests: look deeper than the obvious! 👁️",
+    "The House whispers: sometimes the best move is hidden! 🔍",
+    "The House advises: consider all possibilities! 🤔",
+    "The House reveals: the answer lies in the details! 💡"
   ];
 
-  private gameOverMessages = [
-    "And there you have it! Another chapter in the book of legends! 📖",
-    "Game over, but the story is just beginning! What's your next move? 🎲",
-    "The final move has been played! Time to collect your winnings... or learn from your losses! 💰",
-    "That's a wrap! But remember, every ending is just a new beginning! 🔄",
-    "The dust has settled! Now let's talk about what's next on the agenda! 🎯"
+  private puzzleSuccessMessages = [
+    "The House applauds your success! Well done, champion! 👏",
+    "Excellent! The House recognizes true talent when it sees it! 🏆",
+    "The House is impressed! You've proven yourself worthy! ⭐",
+    "Outstanding! The House celebrates your victory! 🎉",
+    "The House acknowledges your mastery! You are truly skilled! 💎"
   ];
 
-  private betSuggestions = [
-    "Listen, I've got a feeling about this one. How about we make it interesting with a {amount} MAG bet? 🎰",
-    "The stars are aligned, the cards are right, and my gut says {amount} MAG is the magic number! ✨",
-    "I'm seeing {amount} MAG written all over this game! It's practically screaming your name! 💰",
-    "Trust me on this one - {amount} MAG is the sweet spot. You can thank me later! 😏",
-    "The universe is telling me {amount} MAG is your lucky number today! Let's make it happen! 🎯"
+  private puzzleFailureMessages = [
+    "The House is patient! Try again, and learn from your mistakes! 🔄",
+    "Not this time, but The House believes in your potential! 💪",
+    "The House knows you can do better! Don't give up! 📚",
+    "The House challenges you to try again! Every failure is a lesson! 🎯",
+    "The House is not easily defeated! Rise to the challenge! ⚡"
   ];
 
-  private userResponses = {
-    bet: [
-      "That's the spirit! A player after my own heart! Let's make some magic happen! ✨",
-      "Now you're talking! I love a player who knows how to play the game! 🎰",
-      "Bold move! I can already see the victory dance in your future! 💃",
-      "That's what I call confidence! Time to turn that bet into a fortune! 💰",
-      "You've got the right attitude! Let's make this one for the history books! 📚"
+  private puzzleDifficultyMessages = {
+    beginner: [
+      "The House starts you with the basics! Build your foundation! 🌱",
+      "Beginner level in The House! Perfect for warming up! 💪",
+      "The House welcomes you with an easy challenge! 📖"
     ],
-    win: [
-      "BOOM! There it is! I told you this was going to be epic! 🎉",
-      "Winner winner, chicken dinner! You're on fire today! 🔥",
-      "That's how it's done! You're making it look easy! 💪",
-      "The house doesn't always win when you're playing! Nice work! 🎯",
-      "I knew you had it in you! This is just the beginning! 🚀"
+    intermediate: [
+      "The House raises the stakes! Intermediate level awaits! ⚡",
+      "Stepping up in The House! This should be interesting! 🎯",
+      "Intermediate challenge from The House! Show your skills! 💎"
     ],
-    lose: [
-      "Hey, don't sweat it! Every loss is just a lesson learned! 📚",
-      "The best players know how to bounce back! Ready for round two? 💪",
-      "That's the beauty of the game - there's always another chance! 🔄",
-      "Keep your head up! The next one is going to be your big break! ⭐",
-      "Losses happen to the best of us! The key is to keep playing! 🎲"
+    advanced: [
+      "The House presents an advanced challenge! Are you ready? 😈",
+      "Advanced level in The House! Only the skilled survive! 🔥",
+      "The House tests your limits with this advanced puzzle! 🎪"
     ],
-    default: [
-      "I like your style! You've got that winner's mentality! 💪",
-      "Keep talking like that and we're going to be rich! 💰",
-      "You're speaking my language! This is going to be fun! 😄",
-      "I can tell you know how to play the game! Let's make some moves! 🎯",
-      "That's the kind of energy I love to see! Ready to make it happen! ⚡"
+    expert: [
+      "The House challenges you with expert-level difficulty! 🧠",
+      "Expert puzzle from The House! Only masters need apply! 👑",
+      "The House demands excellence! Expert level awaits! ⭐"
+    ],
+    master: [
+      "The House presents the ultimate challenge! Master level! 🏆",
+      "Master difficulty in The House! This is the ultimate test! 💎",
+      "The House reserves this for true masters! Prove yourself! ⚔️"
     ]
   };
 
+  private stakesChangeMessages = [
+    "The House observes the stakes rising! The pot grows ever larger! 🎰",
+    "The House approves of these stakes! Real money on the line! 💰",
+    "The House watches as the pot swells! This is getting interesting! ⚡",
+    "The House feels the tension as stakes increase! The game is heating up! 🔥",
+    "The House acknowledges the growing pot! The stakes are worthy! 💎"
+  ];
+
+  private encouragementMessages = [
+    "The House senses your momentum! Keep the pressure on! 🔥",
+    "The House is impressed with your play! Don't let up now! 💪",
+    "The House feels the energy building! This could be legendary! ⚡",
+    "The House watches with anticipation! You're on fire! 🎯",
+    "The House recognizes greatness! Keep making those moves! 🎰"
+  ];
+
+  private gameOverMessages = [
+    "The House has witnessed another chapter in the saga! 📖",
+    "The House acknowledges the end of this game! What's next? 🎲",
+    "The House has seen the final move! Time to collect or learn! 💰",
+    "The House marks the conclusion of this battle! 🔄",
+    "The House awaits your next challenge! 🎯"
+  ];
+
+  private betSuggestions = [
+    "The House suggests {amount} MAG for this game! The stakes should be worthy! 🎰",
+    "The House recommends {amount} MAG! This is the sweet spot! ✨",
+    "The House sees {amount} MAG as the perfect amount! Trust The House! 💰",
+    "The House advises {amount} MAG for maximum excitement! 😏",
+    "The House knows {amount} MAG is the magic number! 🎯"
+  ];
+
   private loginWarningMessages = [
-    "Hey, high roller! You can't play if you don't buy in—connect that wallet and let's get lucky! 🎲",
-    "Whoa there, partner! You gotta connect your wallet before you can join the action! 💳",
-    "No wallet, no wager! Hook up your wallet and let's chase some wins! 💰",
-    "You can't win if you're not in! Connect your wallet and let's roll the dice! 🎰",
-    "The tables are waiting, but you need to connect your wallet to play! Don't miss out! 🃏"
+    "The House requires a wallet connection to play! Connect and join the game! 🎲",
+    "The House cannot allow play without a wallet! Connect and enter! 💳",
+    "The House demands wallet verification! Connect to proceed! 💰",
+    "The House is waiting for your wallet! Connect and let's begin! 🎰",
+    "The House needs your wallet connected! Don't keep The House waiting! 🃏"
   ];
 
   private insufficientTokenMessages = [
-    "Oh honey, your wallet is looking a little... thin! 💸 Time to hit up the token faucet!",
-    "Broke and beautiful! Your $MAG balance is giving me second-hand embarrassment! 😅",
-    "Looks like someone's been spending their tokens on avocado toast! 🥑 Time to refill that wallet!",
-    "Your token balance is so low, even a penny would feel rich! 😂 Get some $MAG and come back!",
-    "Sweetie, your wallet is drier than a desert! 🌵 Time to get some tokens flowing!",
-    "Oh no, not another broke player! Your $MAG balance is giving me anxiety! 😰",
-    "Looks like you've been living that broke life! 💔 Time to get your financial act together!",
-    "Your token balance is so low, it's practically invisible! 👻 Get some $MAG, stat!",
-    "Honey, your wallet is emptier than my dating life! 😭 Time to load up on tokens!",
-    "Broke alert! 🚨 Your $MAG balance is giving me second-hand poverty! Time to refill!"
+    "The House observes your wallet is... insufficient! Time to refill! 💸",
+    "The House cannot accept such a low balance! Get more tokens! 😅",
+    "The House requires more tokens for play! Your balance is too low! 🥑",
+    "The House demands a proper token balance! Refill and return! 🌵",
+    "The House is disappointed by your token balance! Time to reload! 😰",
+    "The House expects better financial preparation! Get more tokens! 💔",
+    "The House cannot work with such a low balance! Refill required! 👻",
+    "The House is not impressed with your token situation! Fix it! 😭",
+    "The House requires adequate funding! Your balance is insufficient! 🚨"
   ];
 
   private tokenCheckMessages = [
-    "Let me check if you've got the goods to play with the big boys! 💰",
-    "Time to see if your wallet can handle the heat! 🔥",
-    "Checking your financial fitness for this game! 💪",
-    "Let's see if you've got what it takes to join the party! 🎉",
-    "Verifying your token credentials... this better be good! 😏"
+    "The House is verifying your financial credentials! 💰",
+    "The House is checking your token balance! 🔥",
+    "The House is validating your financial fitness! 💪",
+    "The House is examining your token credentials! 🎉",
+    "The House is conducting a financial audit! 😏"
   ];
 
   private moveComments = [
-    "Nice move! I can see the strategy unfolding... 🎯",
-    "That's a bold play! I love the confidence! 💪",
-    "Interesting choice! The plot thickens... ��",
-    "Ooh, that's a spicy move! Things are heating up! 🔥",
-    "Strategic thinking! I can feel the tension building! ⚡",
-    "That's the kind of move that separates winners from losers! 🎰",
-    "I like your style! This is getting interesting! 😏",
-    "The game is evolving! Every move tells a story! 📖",
-    "That's a power play if I've ever seen one! 💎",
-    "The board is your canvas, and you're painting a masterpiece! 🎨"
+    "The House observes a strategic move! The plot thickens! 🎯",
+    "The House acknowledges your bold play! Confidence is key! 💪",
+    "The House notes an interesting choice! The game evolves! 🎭",
+    "The House feels the tension building! This is getting spicy! 🔥",
+    "The House recognizes strategic thinking! The battle continues! ⚡",
+    "The House sees a move of distinction! Quality play! 🎰",
+    "The House appreciates your style! This is interesting! 😏",
+    "The House watches the story unfold! Every move matters! 📖",
+    "The House recognizes a power play! Impressive! 💎",
+    "The House admires your artistry! The board is your canvas! 🎨"
   ];
 
   private playerMoveComments = [
-    "Your move! I can see the wheels turning... 🧠",
-    "That's the spirit! Taking control of the game! 👑",
-    "You're making it look easy! Keep it up! 🚀",
-    "That's how you assert dominance! I love it! 💪",
-    "You're playing like a true champion! 🏆"
+    "The House watches your strategic thinking! 🧠",
+    "The House acknowledges your control of the game! 👑",
+    "The House is impressed with your execution! 🚀",
+    "The House recognizes your dominance! 💪",
+    "The House celebrates your champion's play! 🏆"
   ];
 
   private opponentMoveComments = [
-    "Your opponent is trying to keep up! 😈",
-    "They're putting up a fight, but you've got this! 💪",
-    "The competition is heating up! Time to show them who's boss! 🔥",
-    "They think they can match your skill! Let's prove them wrong! ⚡",
-    "Your opponent is learning the hard way! 😏"
+    "The House sees your opponent's response! 😈",
+    "The House watches the competition intensify! 💪",
+    "The House feels the battle heating up! 🔥",
+    "The House observes their attempt to match you! ⚡",
+    "The House notes their learning curve! 😏"
   ];
 
+  getCurrentCharacter(): string {
+    return 'The House';
+  }
+
   getGreeting(): string {
-    return this.getRandomFrom(this.greetings);
+    return this.getRandomFrom(this.houseGreetings);
+  }
+
+  getGameStartMessage(stakes: number): string {
+    const message = this.getRandomFrom(this.houseGameStartMessages);
+    return stakes > 0 ? `${message} The House sees ${stakes} MAG on the line!` : message;
+  }
+
+  // Puzzle-specific methods
+  getPuzzleStartMessage(difficulty: string): string {
+    const message = this.getRandomFrom(this.puzzleStartMessages);
+    const difficultyMessage = this.getRandomFrom(this.puzzleDifficultyMessages[difficulty as keyof typeof this.puzzleDifficultyMessages] || this.puzzleDifficultyMessages.beginner);
+    return `${message} ${difficultyMessage}`;
+  }
+
+  getPuzzleHintMessage(): string {
+    return this.getRandomFrom(this.puzzleHintMessages);
+  }
+
+  getPuzzleSuccessMessage(timeSpent: number): string {
+    const message = this.getRandomFrom(this.puzzleSuccessMessages);
+    const timeFormatted = this.formatTime(timeSpent);
+    return `${message} Solved in ${timeFormatted}!`;
+  }
+
+  getPuzzleFailureMessage(): string {
+    return this.getRandomFrom(this.puzzleFailureMessages);
+  }
+
+  getPuzzleThemeMessage(theme: string): string {
+    const themeMessages = {
+      crushing: "The House presents a crushing tactical challenge! Show your dominance! 💪",
+      hangingPiece: "The House offers you a hanging piece! Take advantage! 🎯",
+      middlegame: "The House tests your middlegame strategy! Think carefully! 🧠",
+      endgame: "The House challenges your endgame precision! Every move counts! ⚡",
+      short: "The House demands quick tactical thinking! Speed is key! 🚀",
+      long: "The House requires deep calculation! Use your brain! 🔍",
+      advantage: "The House gives you the advantage! Don't waste it! 💎"
+    };
+    return themeMessages[theme as keyof typeof themeMessages] || "The House challenges you to find the best move! 🎯";
+  }
+
+  private formatTime(ms: number): string {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   getInsufficientTokenMessage(): string {
@@ -161,16 +251,11 @@ class GamblerPersonality {
     
     if (isPlayerMove) {
       const comment = this.getRandomFrom(this.playerMoveComments);
-      return `${comment} ${move.notation} - that's how it's done!`;
+      return `${comment} ${move.notation} - The House approves!`;
     } else {
       const comment = this.getRandomFrom(this.opponentMoveComments);
-      return `${comment} ${move.notation} - your turn to respond!`;
+      return `${comment} ${move.notation} - The House awaits your response!`;
     }
-  }
-
-  getGameStartMessage(stakes: number): string {
-    const message = this.getRandomFrom(this.gameStartMessages);
-    return stakes > 0 ? `${message} And I see we've got ${stakes} MAG on the line!` : message;
   }
 
   getStakesChangeMessage(stakes: number): string {
@@ -180,7 +265,7 @@ class GamblerPersonality {
 
   getEncouragementMessage(moveCount: number): string {
     const message = this.getRandomFrom(this.encouragementMessages);
-    return `${message} We're ${moveCount} moves in and the action is just getting started!`;
+    return `${message} The House has witnessed ${moveCount} moves and the action continues!`;
   }
 
   getGameOverMessage(result: string): string {
@@ -193,24 +278,6 @@ class GamblerPersonality {
     return template.replace('{amount}', amount.toString());
   }
 
-  getResponseToUserInput(userInput: string, gameState: GameState): string {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('bet') || input.includes('wager') || input.includes('stake')) {
-      return this.getRandomFrom(this.userResponses.bet);
-    }
-    
-    if (input.includes('win') || input.includes('victory') || input.includes('success')) {
-      return this.getRandomFrom(this.userResponses.win);
-    }
-    
-    if (input.includes('lose') || input.includes('loss') || input.includes('defeat')) {
-      return this.getRandomFrom(this.userResponses.lose);
-    }
-    
-    return this.getRandomFrom(this.userResponses.default);
-  }
-
   getLoginWarning(): string {
     return this.getRandomFrom(this.loginWarningMessages);
   }
@@ -220,4 +287,4 @@ class GamblerPersonality {
   }
 }
 
-export const gamblerPersonality = new GamblerPersonality(); 
+export const housePersonality = new HousePersonality(); 
