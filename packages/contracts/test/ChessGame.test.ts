@@ -18,7 +18,8 @@ describe("ChessGame", function () {
     const chessGame = await ChessGameFactory.deploy(await magnusToken.getAddress(), owner.address);
 
     // Grant the Minter role to the ChessGame contract
-    await magnusToken.transferOwnership(await chessGame.getAddress());
+    const minterRole = await magnusToken.MINTER_ROLE();
+    await magnusToken.grantRole(minterRole, await chessGame.getAddress());
 
     return { chessGame, magnusToken, owner, player1, player2 };
   }
@@ -52,14 +53,16 @@ describe("ChessGame", function () {
       await chessGame.createGame(player1.address, player2.address);
 
       const rewardAmount = await chessGame.winReward();
+      const pgn = "1. e4 e5 2. Nf3 Nc6";
 
-      await expect(chessGame.reportWinner(0, player1.address))
+      await expect(chessGame.reportWinner(0, player1.address, pgn))
         .to.emit(chessGame, "GameFinished")
         .withArgs(0, player1.address);
       
       const game = await chessGame.games(0);
       expect(game.winner).to.equal(player1.address);
       expect(game.isFinished).to.be.true;
+      expect(game.pgn).to.equal(pgn);
 
       const player1Balance = await magnusToken.balanceOf(player1.address);
       expect(player1Balance).to.equal(rewardAmount);
@@ -68,20 +71,22 @@ describe("ChessGame", function () {
     it("Should fail if the winner is not one of the players", async function () {
         const { chessGame, owner, player1, player2 } = await loadFixture(deployContractsFixture);
         await chessGame.createGame(player1.address, player2.address);
+        const pgn = "1. e4 e5";
 
         await expect(
-            chessGame.reportWinner(0, owner.address) // Owner was not in the game
+            chessGame.reportWinner(0, owner.address, pgn) // Owner was not in the game
         ).to.be.revertedWith("Winner must be one of the players");
     });
 
     it("Should fail if the game is already finished", async function () {
         const { chessGame, player1, player2 } = await loadFixture(deployContractsFixture);
         await chessGame.createGame(player1.address, player2.address);
-        await chessGame.reportWinner(0, player1.address); // Finish the game
+        const pgn = "1. e4";
+        await chessGame.reportWinner(0, player1.address, pgn); // Finish the game
 
         // Try to report again
         await expect(
-            chessGame.reportWinner(0, player2.address)
+            chessGame.reportWinner(0, player2.address, pgn)
         ).to.be.revertedWith("Game is already finished");
     });
 

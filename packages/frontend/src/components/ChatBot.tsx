@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { gamblerPersonality } from '../services/gamblerChat';
+import { housePersonality } from '../services/gamblerChat';
 import { useWalletError } from '../contexts/WalletErrorContext';
 import './ChatBot.css';
 
 interface ChatMessage {
   id: string;
   text: string;
-  sender: 'bot' | 'user';
+  sender: 'bot';
   timestamp: Date;
-  type: 'greeting' | 'betting' | 'game_event' | 'encouragement' | 'reaction' | 'move_comment';
+  type: 'greeting' | 'betting' | 'game_event' | 'encouragement' | 'reaction' | 'move_comment' | 'puzzle_event';
 }
 
 interface TypewriterMessageProps {
@@ -45,6 +45,15 @@ interface ChatBotProps {
     gameOver: string;
     moveCount: number;
   };
+  puzzleState?: {
+    isActive: boolean;
+    currentPuzzle: any;
+    difficulty: string;
+    moveIndex: number;
+    totalMoves: number;
+    timeSpent: number;
+    success: boolean;
+  };
   userAccount?: string | null;
   onBetSuggestion?: (amount: number) => void;
   moveHistory?: Array<{
@@ -55,7 +64,13 @@ interface ChatBotProps {
   }>;
 }
 
-const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggestion, moveHistory = [] }) => {
+const ChatBot: React.FC<ChatBotProps> = ({ 
+  gameState, 
+  puzzleState, 
+  userAccount, 
+  onBetSuggestion, 
+  moveHistory = [] 
+}) => {
   const { walletError } = useWalletError();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -63,6 +78,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastGameStateRef = useRef(gameState);
+  const lastPuzzleStateRef = useRef(puzzleState);
   const lastMoveCountRef = useRef(0);
   const lastUserAccountRef = useRef<string | null>(null);
 
@@ -77,31 +93,26 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
   // Clear chat and reset when wallet connects
   useEffect(() => {
     if (userAccount && lastUserAccountRef.current !== userAccount) {
-      // Wallet just connected - clear previous chat
       setMessages([]);
       lastUserAccountRef.current = userAccount;
-      
-      // Add welcome message after a short delay
       setTimeout(() => {
-        addBotMessage(gamblerPersonality.getGreeting(), 'greeting');
+        addBotMessage(housePersonality.getGreeting(), 'greeting');
       }, 500);
     } else if (!userAccount && lastUserAccountRef.current) {
-      // Wallet disconnected
       lastUserAccountRef.current = null;
-      addBotMessage(gamblerPersonality.getLoginWarning(), 'greeting');
+      addBotMessage(housePersonality.getLoginWarning(), 'greeting');
     }
   }, [userAccount]);
 
   // React to wallet errors
   useEffect(() => {
     if (!walletError) return;
-    
     if (walletError.includes('wallet')) {
-      addBotMessage(gamblerPersonality.getLoginWarning(), 'greeting');
+      addBotMessage(housePersonality.getLoginWarning(), 'greeting');
     } else if (walletError.includes('Insufficient $MAG tokens')) {
-      addBotMessage(gamblerPersonality.getInsufficientTokenMessage(), 'reaction');
+      addBotMessage(housePersonality.getInsufficientTokenMessage(), 'reaction');
     } else if (walletError.includes('Checking your token balance')) {
-      addBotMessage(gamblerPersonality.getTokenCheckMessage(), 'game_event');
+      addBotMessage(housePersonality.getTokenCheckMessage(), 'game_event');
     }
   }, [walletError]);
 
@@ -110,13 +121,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
     if (moveHistory && moveHistory.length > lastMoveCountRef.current) {
       const newMoves = moveHistory.slice(lastMoveCountRef.current);
       lastMoveCountRef.current = moveHistory.length;
-      
-      // Add comments for each new move with delays
       newMoves.forEach((move, index) => {
         setTimeout(() => {
-          const moveComment = gamblerPersonality.getMoveComment(move, gameState?.playerColor);
+          const moveComment = housePersonality.getMoveComment(move, gameState?.playerColor || null);
           addBotMessage(moveComment, 'move_comment');
-        }, 1000 + (index * 2000)); // 1 second initial delay + 2 seconds between moves
+        }, 1000 + (index * 2000));
       });
     }
   }, [moveHistory, gameState?.playerColor]);
@@ -125,37 +134,58 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
   useEffect(() => {
     const prevState = lastGameStateRef.current;
     const currentState = gameState;
-
-    // Game started
     if (prevState && currentState && !prevState.isGameActive && currentState.isGameActive) {
       setTimeout(() => {
-        addBotMessage(gamblerPersonality.getGameStartMessage(currentState.currentStakes), 'game_event');
-      }, 1500); // Delay after game starts
+        addBotMessage(housePersonality.getGameStartMessage(currentState.currentStakes), 'game_event');
+      }, 1500);
     }
-
-    // Game over
     if (prevState && currentState && prevState.isGameActive && currentState.gameOver) {
       setTimeout(() => {
-        addBotMessage(gamblerPersonality.getGameOverMessage(currentState.gameOver), 'reaction');
-      }, 2000); // Delay after game ends
+        addBotMessage(housePersonality.getGameOverMessage(currentState.gameOver), 'reaction');
+      }, 2000);
     }
-
-    // Stakes changed
     if (prevState && currentState && prevState.currentStakes !== currentState.currentStakes) {
       setTimeout(() => {
-        addBotMessage(gamblerPersonality.getStakesChangeMessage(currentState.currentStakes), 'betting');
-      }, 1000); // Delay after stakes change
+        addBotMessage(housePersonality.getStakesChangeMessage(currentState.currentStakes), 'betting');
+      }, 1000);
     }
-
-    // Move count increased (encourage betting)
     if (prevState && currentState && currentState.moveCount > prevState.moveCount && currentState.moveCount % 5 === 0) {
       setTimeout(() => {
-        addBotMessage(gamblerPersonality.getEncouragementMessage(currentState.moveCount), 'encouragement');
-      }, 1500); // Delay for encouragement messages
+        addBotMessage(housePersonality.getEncouragementMessage(currentState.moveCount), 'encouragement');
+      }, 1500);
     }
-
     lastGameStateRef.current = currentState;
   }, [gameState]);
+
+  // React to puzzle state changes
+  useEffect(() => {
+    const prevState = lastPuzzleStateRef.current;
+    const currentState = puzzleState;
+    if (prevState && currentState && !prevState.isActive && currentState.isActive) {
+      setTimeout(() => {
+        const puzzleMessage = housePersonality.getPuzzleStartMessage(currentState.difficulty);
+        addBotMessage(puzzleMessage, 'puzzle_event');
+        if (currentState.currentPuzzle?.themes?.length > 0) {
+          setTimeout(() => {
+            const themeMessage = housePersonality.getPuzzleThemeMessage(currentState.currentPuzzle.themes[0]);
+            addBotMessage(themeMessage, 'puzzle_event');
+          }, 2000);
+        }
+      }, 1500);
+    }
+    if (prevState && currentState && prevState.isActive && !currentState.isActive) {
+      setTimeout(() => {
+        if (currentState.success) {
+          const successMessage = housePersonality.getPuzzleSuccessMessage(currentState.timeSpent);
+          addBotMessage(successMessage, 'puzzle_event');
+        } else {
+          const failureMessage = housePersonality.getPuzzleFailureMessage();
+          addBotMessage(failureMessage, 'puzzle_event');
+        }
+      }, 1000);
+    }
+    lastPuzzleStateRef.current = currentState;
+  }, [puzzleState]);
 
   const addBotMessage = (text: string, type: ChatMessage['type']) => {
     const newMessage: ChatMessage = {
@@ -165,43 +195,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
       timestamp: new Date(),
       type
     };
-    
     setIsTyping(true);
     setTypingMessageId(newMessage.id);
     setTimeout(() => {
       setMessages(prev => [...prev, newMessage]);
       setIsTyping(false);
       setTypingMessageId(null);
-    }, 2000 + Math.random() * 3000); // 2-5 second typing delay
-  };
-
-  const handleUserMessage = (text: string) => {
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      text,
-      sender: 'user',
-      timestamp: new Date(),
-      type: 'greeting'
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    
-    // Bot response based on user input
-    setTimeout(() => {
-      const response = gamblerPersonality.getResponseToUserInput(text, gameState || {
-        isGameActive: false,
-        currentStakes: 0,
-        playerColor: null,
-        gameOver: '',
-        moveCount: 0
-      });
-      addBotMessage(response, 'encouragement');
-    }, 500);
-  };
-
-  const suggestBet = (amount: number) => {
-    addBotMessage(gamblerPersonality.getBetSuggestion(amount), 'betting');
-    onBetSuggestion?.(amount);
+    }, 2000 + Math.random() * 3000);
   };
 
   const formatTime = (date: Date) => {
@@ -209,11 +209,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
   };
 
   return (
-    <div className={`chatbot-container ${isMinimized ? 'minimized' : ''}`}>
+    <div className={`chatbot ${isMinimized ? 'minimized' : ''}`}>
       <div className="chatbot-header" onClick={() => setIsMinimized(!isMinimized)}>
         <div className="chatbot-title">
-          <span className="bot-avatar">🎰</span>
-          <span>Lucky Louie</span>
+          <span className="chatbot-icon">🏛️</span>
+          <span className="chatbot-name">The House</span>
         </div>
         <div className="chatbot-controls">
           <button className="minimize-btn">
@@ -221,59 +221,28 @@ const ChatBot: React.FC<ChatBotProps> = ({ gameState, userAccount, onBetSuggesti
           </button>
         </div>
       </div>
-
       {!isMinimized && (
         <>
           <div className="chatbot-messages">
             {messages.map((message) => (
               <div key={message.id} className={`message ${message.sender}`}>
                 <div className="message-content">
-                  <div className="message-text">
-                    {message.sender === 'bot' && typingMessageId === message.id ? (
-                      <TypewriterMessage text={message.text} delay={80} />
-                    ) : (
-                      message.text
-                    )}
-                  </div>
-                  <div className="message-time">{formatTime(message.timestamp)}</div>
+                  <TypewriterMessage 
+                    text={message.text} 
+                    delay={typingMessageId === message.id ? 50 : 0}
+                  />
                 </div>
+                <div className="message-time">{formatTime(message.timestamp)}</div>
               </div>
             ))}
             {isTyping && (
               <div className="message bot">
                 <div className="message-content">
-                  <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
+                  <span className="typing-indicator">...</span>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-
-          <div className="chatbot-actions">
-            <div className="quick-actions">
-              <button 
-                className="quick-bet-btn"
-                onClick={() => suggestBet(10)}
-              >
-                Bet 10 MAG
-              </button>
-              <button 
-                className="quick-bet-btn"
-                onClick={() => suggestBet(50)}
-              >
-                Bet 50 MAG
-              </button>
-              <button 
-                className="quick-bet-btn"
-                onClick={() => suggestBet(100)}
-              >
-                Bet 100 MAG
-              </button>
-            </div>
           </div>
         </>
       )}

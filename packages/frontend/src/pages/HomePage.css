@@ -1,55 +1,363 @@
 .homepage {
-    text-align: center;
-    padding: 2rem;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
     color: var(--text-color);
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    overflow-x: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.homepage.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .hero-section {
-    margin-bottom: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4rem 2rem;
+    min-height: 80vh;
+    position: relative;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 600px;
+    z-index: 2;
+}
+
+.hero-visual {
+    flex: 1;
+    position: relative;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.floating-chess-pieces {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.piece {
+    position: absolute;
+    font-size: 3rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 20px rgba(0, 255, 149, 0.5);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 149, 0.3));
+}
+
+/* All pieces move in one large circular formation with equal spacing */
+.piece:nth-child(1) { 
+    animation: circleFormation 12s linear infinite, glowPulse 3s ease-in-out infinite;
+    animation-delay: 0s;
+}
+
+.piece:nth-child(2) { 
+    animation: circleFormation 12s linear infinite, glowPulse 4s ease-in-out infinite;
+    animation-delay: -2s;
+}
+
+.piece:nth-child(3) { 
+    animation: circleFormation 12s linear infinite, glowPulse 3.5s ease-in-out infinite;
+    animation-delay: -4s;
+}
+
+.piece:nth-child(4) { 
+    animation: circleFormation 12s linear infinite, glowPulse 2.5s ease-in-out infinite;
+    animation-delay: -6s;
+}
+
+.piece:nth-child(5) { 
+    animation: circleFormation 12s linear infinite, glowPulse 3.8s ease-in-out infinite;
+    animation-delay: -8s;
+}
+
+.piece:nth-child(6) { 
+    animation: circleFormation 12s linear infinite, glowPulse 2.8s ease-in-out infinite;
+    animation-delay: -10s;
+}
+
+/* Single circular formation animation for all pieces */
+@keyframes circleFormation {
+    0% { 
+        transform: rotate(0deg) translateX(150px) rotate(0deg); 
+    }
+    100% { 
+        transform: rotate(360deg) translateX(150px) rotate(-360deg); 
+    }
+}
+
+/* Glow pulse animation for subtle visual effect */
+@keyframes glowPulse {
+    0%, 100% { 
+        text-shadow: 0 0 20px rgba(0, 255, 149, 0.5);
+        filter: drop-shadow(0 0 10px rgba(0, 255, 149, 0.3));
+    }
+    50% { 
+        text-shadow: 0 0 30px rgba(0, 255, 149, 0.8);
+        filter: drop-shadow(0 0 20px rgba(0, 255, 149, 0.6));
+    }
 }
 
 .subtitle {
-    font-size: 1.2rem;
-    color: #aaa;
-    margin-bottom: 2rem;
+    font-size: 1.4rem;
+    color: #b0b0b0;
+    margin: 2rem 0;
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin: 3rem 0;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .cta-button {
-    background-color: var(--primary-color);
-    color: #101010;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #00d4aa 100%);
+    color: #000;
     border: none;
-    padding: 1rem 2.5rem;
+    padding: 1.2rem 3rem;
     font-size: 1.2rem;
     font-weight: bold;
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 2px;
+    border-radius: 50px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 255, 149, 0.3);
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cta-button:hover::before {
+    left: 100%;
 }
 
 .cta-button:hover {
-    background-color: #fff;
-    color: #101010;
-    transform: translateY(-3px);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 255, 149, 0.4);
+}
+
+.cta-icon {
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 .features-section {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.feature {
-    background-color: var(--component-bg);
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    width: 250px;
+.feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideInUp 0.6s ease forwards;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.feature-card.active {
+    transform: translateY(-15px) scale(1.05);
+}
+
+.feature-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.feature-card h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+.feature-card p {
+    color: #b0b0b0;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.feature-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover .feature-glow {
+    opacity: 1;
+}
+
+.cta-section {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.cta-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4rem 3rem;
+    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(0, 255, 149, 0.1), transparent);
+    animation: rotate 10s linear infinite;
+}
+
+.cta-card h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+}
+
+.cta-card p {
+    font-size: 1.2rem;
+    color: #b0b0b0;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.primary-btn, .secondary-btn {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #00d4aa 100%);
+    color: #000;
+}
+
+.secondary-btn {
+    background: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.primary-btn:hover, .secondary-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* Glitch Effect */
@@ -60,6 +368,7 @@
     position: relative;
     text-shadow: 0.05em 0 0 var(--primary-color), -0.025em -0.05em 0 #ff00c1, 0.025em 0.05em 0 #00a8ff;
     animation: glitch 500ms infinite;
+    margin-bottom: 1rem;
 }
 
 .glitch:before,
@@ -98,8 +407,125 @@
 }
 
 @keyframes glitch-top {
-    /* ... (glitch animation keyframes) ... */
+    0% { clip: rect(0, 0, 0, 0); }
+    20% { clip: rect(0, 0, 0, 0); }
+    21% { clip: rect(0, 0, 0, 0); }
+    24% { clip: rect(0, 0, 0, 0); }
+    25% { clip: rect(0, 0, 0, 0); }
+    54% { clip: rect(0, 0, 0, 0); }
+    55% { clip: rect(0, 0, 0, 0); }
+    56% { clip: rect(0, 0, 0, 0); }
+    57% { clip: rect(0, 0, 0, 0); }
+    85% { clip: rect(0, 0, 0, 0); }
+    86% { clip: rect(0, 0, 0, 0); }
+    87% { clip: rect(0, 0, 0, 0); }
+    88% { clip: rect(0, 0, 0, 0); }
+    89% { clip: rect(0, 0, 0, 0); }
+    90% { clip: rect(0, 0, 0, 0); }
+    91% { clip: rect(0, 0, 0, 0); }
+    92% { clip: rect(0, 0, 0, 0); }
+    93% { clip: rect(0, 0, 0, 0); }
+    94% { clip: rect(0, 0, 0, 0); }
+    95% { clip: rect(0, 0, 0, 0); }
+    96% { clip: rect(0, 0, 0, 0); }
+    97% { clip: rect(0, 0, 0, 0); }
+    98% { clip: rect(0, 0, 0, 0); }
+    99% { clip: rect(0, 0, 0, 0); }
+    100% { clip: rect(0, 0, 0, 0); }
 }
+
 @keyframes glitch-bottom {
-    /* ... (glitch animation keyframes) ... */
+    0% { clip: rect(0, 0, 0, 0); }
+    20% { clip: rect(0, 0, 0, 0); }
+    21% { clip: rect(0, 0, 0, 0); }
+    24% { clip: rect(0, 0, 0, 0); }
+    25% { clip: rect(0, 0, 0, 0); }
+    54% { clip: rect(0, 0, 0, 0); }
+    55% { clip: rect(0, 0, 0, 0); }
+    56% { clip: rect(0, 0, 0, 0); }
+    57% { clip: rect(0, 0, 0, 0); }
+    85% { clip: rect(0, 0, 0, 0); }
+    86% { clip: rect(0, 0, 0, 0); }
+    87% { clip: rect(0, 0, 0, 0); }
+    88% { clip: rect(0, 0, 0, 0); }
+    89% { clip: rect(0, 0, 0, 0); }
+    90% { clip: rect(0, 0, 0, 0); }
+    91% { clip: rect(0, 0, 0, 0); }
+    92% { clip: rect(0, 0, 0, 0); }
+    93% { clip: rect(0, 0, 0, 0); }
+    94% { clip: rect(0, 0, 0, 0); }
+    95% { clip: rect(0, 0, 0, 0); }
+    96% { clip: rect(0, 0, 0, 0); }
+    97% { clip: rect(0, 0, 0, 0); }
+    98% { clip: rect(0, 0, 0, 0); }
+    99% { clip: rect(0, 0, 0, 0); }
+    100% { clip: rect(0, 0, 0, 0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    
+    .hero-stats {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .features-section {
+        grid-template-columns: 1fr;
+        padding: 2rem 1rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .glitch {
+        font-size: 3rem;
+    }
+    
+    .floating-chess-pieces {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .piece {
+        font-size: 2.5rem;
+    }
+    
+    /* Adjust circle radius for mobile */
+    @keyframes circleFormation {
+        0% { 
+            transform: rotate(0deg) translateX(100px) rotate(0deg); 
+        }
+        100% { 
+            transform: rotate(360deg) translateX(100px) rotate(-360deg); 
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-chess-pieces {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .piece {
+        font-size: 2rem;
+    }
+    
+    /* Adjust circle radius for small mobile */
+    @keyframes circleFormation {
+        0% { 
+            transform: rotate(0deg) translateX(80px) rotate(0deg); 
+        }
+        100% { 
+            transform: rotate(360deg) translateX(80px) rotate(-360deg); 
+        }
+    }
 } 

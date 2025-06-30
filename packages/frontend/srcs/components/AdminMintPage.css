@@ -1,0 +1,12 @@
+.admin-mint-button {
+    background: linear-gradient(45deg, #2196f3, #1565c0);
+}
+
+.admin-mint-button:hover {
+    background: linear-gradient(45deg, #8e24aa, #5e35b1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.admin-mint-button:disabled {
+    background: #555;
+} 

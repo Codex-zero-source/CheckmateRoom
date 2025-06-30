@@ -27,12 +27,17 @@ describe("MagnusToken", function () {
       expect(await magnusToken.symbol()).to.equal("MAG");
     });
 
-    it("Should assign the total supply of tokens to the owner", async function () {
+    it("Should assign the total supply of tokens to the owner and grant roles", async function () {
       const { magnusToken, owner } = await loadFixture(deployTokenFixture);
       const ownerBalance = await magnusToken.balanceOf(owner.address);
       const expectedSupply = ethers.parseUnits("1000000", 18); // 1,000,000 tokens with 18 decimals
       expect(await magnusToken.totalSupply()).to.equal(expectedSupply);
       expect(ownerBalance).to.equal(expectedSupply);
+
+      const adminRole = await magnusToken.DEFAULT_ADMIN_ROLE();
+      const minterRole = await magnusToken.MINTER_ROLE();
+      expect(await magnusToken.hasRole(adminRole, owner.address)).to.be.true;
+      expect(await magnusToken.hasRole(minterRole, owner.address)).to.be.true;
     });
   });
 
@@ -72,7 +77,7 @@ describe("MagnusToken", function () {
   });
 
   describe("Minting", function () {
-    it("Should allow the owner to mint new tokens", async function () {
+    it("Should allow accounts with MINTER_ROLE to mint new tokens", async function () {
         const { magnusToken, owner, otherAccount } = await loadFixture(deployTokenFixture);
         const amountToMint = ethers.parseUnits("1000", 18);
 
@@ -83,13 +88,15 @@ describe("MagnusToken", function () {
         expect(await magnusToken.totalSupply()).to.equal(newTotalSupply);
     });
 
-    it("Should not allow non-owners to mint new tokens", async function () {
+    it("Should not allow accounts without MINTER_ROLE to mint new tokens", async function () {
         const { magnusToken, otherAccount } = await loadFixture(deployTokenFixture);
         const amountToMint = ethers.parseUnits("1000", 18);
+        const minterRole = await magnusToken.MINTER_ROLE();
 
         await expect(
             magnusToken.connect(otherAccount).mint(otherAccount.address, amountToMint)
-        ).to.be.revertedWithCustomError(magnusToken, "OwnableUnauthorizedAccount");
+        ).to.be.revertedWithCustomError(magnusToken, "AccessControlUnauthorizedAccount")
+         .withArgs(otherAccount.address, minterRole);
     });
   });
 }); 

@@ -1,0 +1,197 @@
+.admin-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    animation: slideInRight 0.5s ease-out;
+}
+
+.admin-notification-content {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 2px solid #ffb300;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(10px);
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.admin-notification-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 179, 0, 0.3);
+}
+
+.admin-icon {
+    font-size: 1.5rem;
+    animation: crownGlow 2s ease-in-out infinite;
+}
+
+.admin-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #8b4513;
+    flex-grow: 1;
+}
+
+.close-btn {
+    background: rgba(255, 179, 0, 0.2);
+    border: 1px solid rgba(255, 179, 0, 0.4);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #8b4513;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 179, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.admin-notification-body p {
+    color: #8b4513;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 1.2rem;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.admin-btn.primary {
+    background: linear-gradient(135deg, #8b4513, #a0522d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+}
+
+.admin-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+}
+
+.admin-btn.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: #8b4513;
+    border: 1px solid rgba(255, 179, 0, 0.4);
+}
+
+.admin-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes crownGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .admin-notification-content {
+        min-width: auto;
+        max-width: none;
+        padding: 1.2rem;
+    }
+    
+    .admin-notification-header {
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.6rem;
+    }
+    
+    .admin-title {
+        font-size: 1rem;
+    }
+    
+    .admin-actions {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    
+    .admin-btn {
+        justify-content: center;
+        padding: 0.8rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-notification {
+        top: 5px;
+        right: 5px;
+        left: 5px;
+    }
+    
+    .admin-notification-content {
+        padding: 1rem;
+    }
+    
+    .admin-notification-header {
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .admin-icon {
+        font-size: 1.3rem;
+    }
+    
+    .admin-title {
+        font-size: 0.9rem;
+    }
+    
+    .admin-notification-body p {
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .admin-btn {
+        font-size: 0.8rem;
+        padding: 0.7rem 0.8rem;
+    }
+} 

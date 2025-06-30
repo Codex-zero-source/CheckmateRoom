@@ -1,0 +1,340 @@
+.spectator-betting {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1rem 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.betting-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.betting-header h3 {
+  color: #4ecdc4;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+.betting-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.bet-info {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bet-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bet-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.bet-total.white {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bet-total.black {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.bet-total .label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.bet-total .amount {
+  color: #4ecdc4;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.spectator-count {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.betting-form {
+  margin-bottom: 2rem;
+}
+
+.side-selection {
+  margin-bottom: 1.5rem;
+}
+
+.side-selection h4 {
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.side-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.side-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.side-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.side-btn.white {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.side-btn.white:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.side-btn.black {
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+.side-btn.black:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.7);
+}
+
+.side-btn.selected {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.side-btn.white.selected {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #4ecdc4;
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+}
+
+.side-btn.black.selected {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: #4ecdc4;
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+}
+
+.side-btn .piece {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.side-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.amount-input {
+  margin-bottom: 1.5rem;
+}
+
+.amount-input label {
+  display: block;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.amount-input input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.amount-input input:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+}
+
+.amount-input input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.amount-input input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.success-message {
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #4ecdc4;
+  font-weight: 500;
+}
+
+.place-bet-btn {
+  width: 100%;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+}
+
+.place-bet-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+}
+
+.place-bet-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.place-bet-btn.loading {
+  background: linear-gradient(135deg, #666, #888);
+}
+
+.bet-icon {
+  font-size: 1.2rem;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.betting-rules {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.betting-rules h4 {
+  color: #4ecdc4;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.betting-rules ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.betting-rules li {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .spectator-betting {
+    padding: 1.5rem;
+  }
+  
+  .bet-totals {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .side-buttons {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .side-btn {
+    padding: 1rem;
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .side-btn .piece {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .spectator-betting {
+    padding: 1rem;
+  }
+  
+  .betting-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .place-bet-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+} 

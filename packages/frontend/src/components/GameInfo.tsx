@@ -4,15 +4,26 @@ interface GameInfoProps {
     gameId: number | null;
     status: string;
     gameOver: string;
+    playerColor: 'white' | 'black' | null;
 }
 
-const GameInfo: FC<GameInfoProps> = ({ gameId, status, gameOver }) => {
+const GameInfo: FC<GameInfoProps> = ({ gameId, status, gameOver, playerColor }) => {
     return (
         <div className="game-info">
             <h3>Game Status</h3>
             <div className="info-item">
                 <span className="info-label">Game ID:</span>
                 <span className="info-value mono">{gameId !== null ? `#${gameId}` : 'N/A'}</span>
+            </div>
+            <div className="info-item">
+                <span className="info-label">Your Color:</span>
+                <span className="info-value mono">
+                    {playerColor ? (
+                        <span className={`color-indicator ${playerColor}`}>
+                            {playerColor.charAt(0).toUpperCase() + playerColor.slice(1)}
+                        </span>
+                    ) : 'Not assigned'}
+                </span>
             </div>
             <div className="info-item">
                 <span className="info-label">Last Action:</span>
