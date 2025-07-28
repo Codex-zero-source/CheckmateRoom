@@ -2,7 +2,9 @@
 
 This list breaks down the development of the Magnus dApp into manageable tasks.
 
-## Phase 1: Project Setup & Core Smart Contracts ✅ COMPLETED
+## Goal 1: Core Platform Development
+
+### Phase 1: Project Setup & Core Smart Contracts ✅ COMPLETED
 
 -   [x] **1. Initialize Project Structure:**
     -   [x] Create a monorepo structure with separate packages for `contracts`, `frontend`, and `backend`.
@@ -21,7 +23,7 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [x] Implement the logic to connect to a user's MetaMask wallet.
     -   [x] Display the user's wallet address and their `$magnus` token balance.
 
-## Phase 2: Chess Gameplay & Rewards ✅ COMPLETED
+### Phase 2: Chess Gameplay & Rewards ✅ COMPLETED
 
 -   [x] **4. Game Logic Smart Contract:**
     -   [x] Design and write `ChessGame.sol` to manage game state and outcomes.
@@ -35,7 +37,7 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [x] Connect the frontend game to the `ChessGame.sol` smart contract to report results.
     -   [x] Implement Player vs. Player (PvP) logic (two players on the same screen for now).
 
-## Phase 3: Real-time Multiplayer & Advanced Features ✅ COMPLETED
+### Phase 3: Real-time Multiplayer & Advanced Features ✅ COMPLETED
 
 -   [x] **6. Real-time Multiplayer System:**
     -   [x] WebSocket backend with Socket.IO for live game synchronization
@@ -82,7 +84,7 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [x] Comprehensive error handling and user feedback
     -   [x] Game state persistence and recovery
 
-## Phase 4: Smart Contract Integration & Game Completion ✅ COMPLETED
+### Phase 4: Smart Contract Integration & Game Completion ✅ COMPLETED
 
 -   [x] **12. Complete On-Chain Integration:**
     -   [x] Implement actual token transfer on game creation (currently only logging)
@@ -104,7 +106,7 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [x] Cross-browser compatibility testing
     -   [x] Mobile responsiveness testing
 
-## Phase 5: Backend Refactoring & Testing 🛠️ IN PROGRESS
+### Phase 5: Backend Refactoring & Testing 🛠️ IN PROGRESS
 
 -   [x] **15. Security Hardening:**
     -   [x] Remove hardcoded secrets (`JWT_SECRET`, `DATABASE_URL`) from the codebase.
@@ -137,7 +139,28 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
         -   [ ] Write tests for socket connection and authentication using `socket.io-client`.
         -   [ ] Test game creation, joining, and lobby updates.
 
-## Phase 6: Advanced Features & Enhancements 📋 IN PROGRESS
+## Goal 2: Blockchain Migration to Somnia
+
+*   **Task 1: Environment Setup**
+    *   [ ] Add Somnia network configuration to `hardhat.config.ts`.
+    *   [ ] Update `.env` with Somnia RPC URL and private key.
+    *   [ ] Install any necessary Somnia-specific libraries (e.g., Viem).
+*   **Task 2: Smart Contract Deployment**
+    *   [ ] Review smart contracts for any Somnia-specific adjustments.
+    *   [ ] Deploy `MagnusToken.sol` and `ChessGame.sol` to the Somnia testnet.
+    *   [ ] Verify the deployed contracts on the Somnia block explorer.
+*   **Task 3: Backend Integration**
+    *   [ ] Update backend services to connect to the Somnia network.
+    *   [ ] Update contract addresses in the backend configuration.
+    *   [ ] Test backend interaction with the deployed contracts.
+*   **Task 4: Frontend Integration**
+    *   [ ] Update frontend to connect to the Somnia network via MetaMask.
+    *   [ ] Update contract addresses and ABI in the frontend.
+    *   [ ] Test all frontend interactions with the smart contracts on the Somnia network.
+
+## Goal 3: Advanced Features & Enhancements
+
+### Phase 6: Advanced Features & Enhancements 📋 IN PROGRESS
 
 -   [ ] **19. Enhanced Betting System:**
     -   [ ] Tournament betting support with brackets
@@ -171,7 +194,9 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [x] Real-time puzzle validation and hints
     -   [x] Puzzle statistics and database integration
 
-## Phase 7: Community & Social Features 📋 FUTURE
+## Goal 4: Community & Social Features
+
+### Phase 7: Community & Social Features 📋 FUTURE
 
 -   [ ] **23. Community Features:**
     -   [ ] Direct messaging system between users
@@ -187,154 +212,12 @@ This list breaks down the development of the Magnus dApp into manageable tasks.
     -   [ ] Referral system with rewards
     -   [ ] NFT integration for special achievements
 
-## Phase 8: NFT Deck of Cards System 🃏 PLANNED
-
--   [ ] **25. NFT Card Smart Contract:**
-    -   [ ] Design and implement `MagnusCards.sol` (ERC-721 standard)
-    -   [ ] Card metadata structure with rarity, power, and special abilities
-    -   [ ] Card minting and distribution mechanisms
-    -   [ ] Card trading and marketplace functionality
-    -   [ ] Integration with existing achievement system
-    -   [ ] Card fusion and evolution mechanics
-
--   [ ] **26. Card Collection & Rarity System:**
-    -   [ ] **Standard Cards (Common - 40% drop rate):**
-        -   [ ] Number cards (2-10) - 26 cards total
-        -   [ ] Basic suits (Hearts, Diamonds, Clubs, Spades)
-        -   [ ] Standard artwork with chess-themed designs
-        -   [ ] Basic power levels (1-10)
-    -   [ ] **Face Cards (Uncommon - 25% drop rate):**
-        -   [ ] Jack, Queen, King - 12 cards total
-        -   [ ] Enhanced artwork with chess piece themes
-        -   [ ] Special abilities (e.g., Queen's Gambit, King's Defense)
-        -   [ ] Medium power levels (11-13)
-    -   [ ] **Aces (Rare - 15% drop rate):**
-        -   [ ] Ace of each suit - 4 cards total
-        -   [ ] Premium artwork with legendary chess themes
-        -   [ ] Powerful abilities (e.g., Ace's Checkmate, Royal Flush)
-        -   [ ] High power levels (14-17)
-    -   [ ] **Special Cards (Very Rare - 10% drop rate):**
-        -   [ ] Chess-themed special cards (Knight's Move, Bishop's Blessing)
-        -   [ ] Limited edition artwork
-        -   [ ] Unique abilities and effects
-        -   [ ] Power levels (18-20)
-    -   [ ] **Joker Cards (Legendary - 5% drop rate):**
-        -   [ ] Multiple Joker variants (Red Joker, Black Joker, Wild Joker)
-        -   [ ] Ultra-rare artwork with animated elements
-        -   [ ] Game-changing abilities (e.g., Joker's Wild, Chaos Theory)
-        -   [ ] Maximum power levels (21-25)
-    -   [ ] **Mystery Cards (Mythic - 3% drop rate):**
-        -   [ ] Hidden cards that can be any rarity
-        -   [ ] Special reveal mechanics
-        -   [ ] Bonus rewards and surprises
-        -   [ ] Variable power levels
-    -   [ ] **Promotional Cards (Ultra Mythic - 2% drop rate):**
-        -   [ ] Event-exclusive cards
-        -   [ ] Tournament winner cards
-        -   [ ] Special collaboration cards
-        -   [ ] Unique abilities and artwork
-
--   [ ] **27. Card Acquisition & Distribution:**
-    -   [ ] **Achievement Rewards:**
-        -   [ ] Unlock cards by completing achievements
-        -   [ ] Rarity based on achievement difficulty
-        -   [ ] Special cards for milestone achievements
-        -   [ ] Bonus cards for perfect achievements
-    -   [ ] **Game Rewards:**
-        -   [ ] Win cards by winning chess games
-        -   [ ] Streak bonuses for consecutive wins
-        -   [ ] Tournament participation rewards
-        -   [ ] Special event rewards
-    -   [ ] **Purchase System:**
-        -   [ ] Card packs with MAG tokens
-        -   [ ] Different pack tiers (Basic, Premium, Legendary)
-        -   [ ] Guaranteed rarity in premium packs
-        -   [ ] Limited edition pack releases
-    -   [ ] **Trading & Marketplace:**
-        -   [ ] Peer-to-peer card trading
-        -   [ ] Marketplace with MAG token pricing
-        -   [ ] Auction system for rare cards
-        -   [ ] Card rental system
-
--   [ ] **28. Card Gameplay Integration:**
-    -   [ ] **Card Effects in Chess:**
-        -   [ ] Power-up cards that enhance pieces
-        -   [ ] Special move cards (extra moves, piece swaps)
-        -   [ ] Protection cards (piece immunity, draw protection)
-        -   [ ] Strategy cards (board analysis, hint systems)
-    -   [ ] **Card Battles:**
-        -   [ ] Card-based mini-games
-        -   [ ] Card power comparisons
-        -   [ ] Strategic card deployment
-        -   [ ] Card combination effects
-    -   [ ] **Collection Bonuses:**
-        -   [ ] Set completion rewards
-        -   [ ] Rarity-based bonuses
-        -   [ ] Collection power multipliers
-        -   [ ] Special abilities for complete sets
-
--   [ ] **29. Frontend Card System:**
-    -   [ ] **Card Collection UI:**
-        -   [ ] Interactive card gallery
-        -   [ ] Card filtering and sorting
-        -   [ ] Rarity indicators and animations
-        -   [ ] Card details and statistics
-    -   [ ] **Card Opening Experience:**
-        -   [ ] Animated pack opening
-        -   [ ] Card reveal effects
-        -   [ ] Rarity celebration animations
-        -   [ ] Sound effects and music
-    -   [ ] **Card Management:**
-        -   [ ] Deck building interface
-        -   [ ] Card fusion and evolution
-        -   [ ] Trading interface
-        -   [ ] Marketplace integration
-    -   [ ] **Card Display:**
-        -   [ ] High-quality card artwork
-        -   [ ] Animated card effects
-        -   [ ] Card information tooltips
-        -   [ ] Collection statistics
-
--   [ ] **30. Backend Card Services:**
-    -   [ ] **Card Database:**
-        -   [ ] Card metadata storage
-        -   [ ] User collection tracking
-        -   [ ] Card transaction history
-        -   [ ] Rarity statistics
-    -   [ ] **Card Distribution:**
-        -   [ ] Random card generation
-        -   [ ] Rarity-based distribution
-        -   [ ] Achievement reward system
-        -   [ ] Event card distribution
-    -   [ ] **Trading System:**
-        -   [ ] Card trade validation
-        -   [ ] Marketplace order management
-        -   [ ] Auction system backend
-        -   [ ] Escrow and security
-
--   [ ] **31. Card Economy & Tokenomics:**
-    -   [ ] **Card Value System:**
-        -   [ ] Rarity-based pricing
-        -   [ ] Market-driven valuations
-        -   [ ] Card power scaling
-        -   [ ] Inflation/deflation mechanisms
-    -   [ ] **MAG Token Integration:**
-        -   [ ] Card pack purchases
-        -   [ ] Marketplace transactions
-        -   [ ] Card fusion costs
-        -   [ ] Trading fees
-    -   [ ] **Economic Balance:**
-        -   [ ] Supply and demand mechanics
-        -   [ ] Card scarcity controls
-        -   [ ] Price stabilization
-        -   [ ] Anti-inflation measures
-
 ## Current Project Status
 
 **Last Completed:** Phase 4 - Complete on-chain integration and comprehensive game flow
 **Current Working State:** ✅ Fully functional real-time multiplayer chess with complete betting and smart contract integration
 **Build Status:** ✅ Frontend and backend build successfully
-**Next Priority:** Phase 5 - Advanced features and enhancements, then Phase 7 - NFT Card System
+**Next Priority:** Goal 2 - Blockchain Migration to Somnia
 
 ## Development Commands
 
@@ -353,4 +236,4 @@ cd packages/frontend && npm run build
 ```
 
 ---
-*Project has significantly exceeded original scope and now includes a complete real-time multiplayer chess dApp with betting, theming, engaging ChatBot integration, and plans for a comprehensive NFT card collection system with Pokemon-like rarity distribution.* 
+*Project has significantly exceeded original scope and now includes a complete real-time multiplayer chess dApp with betting, theming, engaging ChatBot integration, and plans for a comprehensive NFT card collection system with Pokemon-like rarity distribution.*

@@ -15,7 +15,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const { FUJI_PRIVATE_KEY, AVALANCHE_API_KEY } = process.env;
+const { SOMNIA_PRIVATE_KEY, SOMNIA_API_KEY } = process.env;
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
@@ -24,11 +24,16 @@ const config: HardhatUserConfig = {
       url: `https://api.avax-test.network/ext/bc/C/rpc`,
       gasPrice: 225000000000,
       chainId: 43113,
-      accounts: FUJI_PRIVATE_KEY ? [FUJI_PRIVATE_KEY] : [],
+      accounts: SOMNIA_PRIVATE_KEY ? [SOMNIA_PRIVATE_KEY] : [],
+    },
+    somnia: {
+      url: `https://dream-rpc.somnia.network`,
+      chainId: 50312,
+      accounts: SOMNIA_PRIVATE_KEY ? [SOMNIA_PRIVATE_KEY] : [],
     },
   },
   etherscan: {
-    apiKey: AVALANCHE_API_KEY,
+    apiKey: SOMNIA_API_KEY,
   },
 };
 

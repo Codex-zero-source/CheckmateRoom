@@ -2,14 +2,11 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./MagnusToken.sol";
-
 /**
  * @title ChessGame
  * @dev Manages the state and rewards for chess matches with spectator betting.
  */
 contract ChessGame is Ownable {
-    MagnusToken public magnusToken;
 
     struct SpectatorBet {
         address spectator;
@@ -24,7 +21,7 @@ contract ChessGame is Ownable {
         address winner;
         bool isFinished;
         string pgn;
-        uint256 betAmount; // Amount in MAGNUS tokens
+        uint256 betAmount; // Amount in STT
         address whiteBet; // White player's wallet who placed bet
         address blackBet; // Black player's wallet who placed bet
         bool betsLocked; // Whether bets are locked (game started)
@@ -39,7 +36,7 @@ contract ChessGame is Ownable {
     mapping(uint256 => Game) public games;
     uint256 public nextGameId;
 
-    uint256 public fixedReward = 5 * 10 ** 18; // 5 MAG tokens fixed reward
+    uint256 public fixedReward = 5 * 10 ** 18; // 5 STT fixed reward
     uint256 public houseFee = 50; // 0.5% house fee (50 basis points)
     uint256 public constant BASIS_POINTS = 10000;
 
@@ -49,15 +46,8 @@ contract ChessGame is Ownable {
     event SpectatorBetPlaced(uint256 gameId, address spectator, uint256 amount, bool isWhite);
     event BetsLocked(uint256 gameId);
     event SpectatorRewardsDistributed(uint256 gameId, uint256 totalWhiteBets, uint256 totalBlackBets);
-    event AdminMint(address recipient, uint256 amount);
 
-    /**
-     * @dev Sets the address of the MagnusToken contract.
-     * @param _tokenAddress The address of the deployed MagnusToken.
-     */
-    constructor(address _tokenAddress, address initialOwner) Ownable(initialOwner) {
-        magnusToken = MagnusToken(_tokenAddress);
-    }
+    constructor(address initialOwner) Ownable(initialOwner) {}
 
     /**
      * @dev Creates a new game. Only callable by the owner for now.
@@ -97,20 +87,16 @@ contract ChessGame is Ownable {
     }
 
     /**
-     * @dev Places a bet for a game using MAGNUS tokens.
+     * @dev Places a bet for a game using STT.
      * @param gameId The ID of the game to bet on.
-     * @param amount The amount of MAGNUS tokens to bet.
      * @param isWhite True if betting on white, false for black.
      */
-    function placeBet(uint256 gameId, uint256 amount, bool isWhite) public {
+    function placeBet(uint256 gameId, bool isWhite) public payable {
         Game storage game = games[gameId];
         
         require(!game.isFinished, "Game is already finished");
         require(!game.betsLocked, "Bets are locked");
-        require(amount > 0, "Bet amount must be greater than 0");
-        
-        // Transfer tokens from player to contract
-        require(magnusToken.transferFrom(msg.sender, address(this), amount), "Token transfer failed");
+        require(msg.value > 0, "Bet amount must be greater than 0");
         
         if (isWhite) {
             require(game.whiteBet == address(0), "White bet already placed");
@@ -120,46 +106,42 @@ contract ChessGame is Ownable {
             game.blackBet = msg.sender;
         }
         
-        game.betAmount = amount;
-        emit BetPlaced(gameId, msg.sender, amount);
+        game.betAmount = msg.value;
+        emit BetPlaced(gameId, msg.sender, msg.value);
     }
 
     /**
      * @dev Places a spectator bet on a game.
      * @param gameId The ID of the game to bet on.
-     * @param amount The amount of MAGNUS tokens to bet.
      * @param isWhite True if betting on white, false for black.
      */
-    function placeSpectatorBet(uint256 gameId, uint256 amount, bool isWhite) public {
+    function placeSpectatorBet(uint256 gameId, bool isWhite) public payable {
         Game storage game = games[gameId];
         
         require(!game.isFinished, "Game is already finished");
         require(!game.betsLocked, "Bets are locked");
-        require(amount > 0, "Bet amount must be greater than 0");
+        require(msg.value > 0, "Bet amount must be greater than 0");
         require(!game.hasSpectatorBet[msg.sender], "Spectator already placed a bet");
         require(msg.sender != game.player1 && msg.sender != game.player2, "Players cannot place spectator bets");
-        
-        // Transfer tokens from spectator to contract
-        require(magnusToken.transferFrom(msg.sender, address(this), amount), "Token transfer failed");
         
         // Add spectator bet
         game.spectatorBets.push(SpectatorBet({
             spectator: msg.sender,
-            amount: amount,
+            amount: msg.value,
             isWhite: isWhite,
             isPaid: false
         }));
         
         // Update totals
         if (isWhite) {
-            game.totalWhiteBets += amount;
+            game.totalWhiteBets += msg.value;
         } else {
-            game.totalBlackBets += amount;
+            game.totalBlackBets += msg.value;
         }
         
         game.hasSpectatorBet[msg.sender] = true;
         
-        emit SpectatorBetPlaced(gameId, msg.sender, amount, isWhite);
+        emit SpectatorBetPlaced(gameId, msg.sender, msg.value, isWhite);
     }
 
     /**
@@ -180,7 +162,7 @@ contract ChessGame is Ownable {
     /**
      * @dev Reports the winner of a game, stores the game's PGN, and distributes the reward and bets.
      * Players can report results for games they participated in.
-     * Winner receives: fixed reward (5 MAG) + total stakes (both players' bets)
+     * Winner receives: total stakes (both players' bets)
      */
     function reportWinner(uint256 gameId, address winner, string calldata pgn) public {
         Game storage game = games[gameId];
@@ -193,14 +175,11 @@ contract ChessGame is Ownable {
         game.isFinished = true;
         game.pgn = pgn;
 
-        // Mint fixed reward tokens to the winner
-        magnusToken.mint(winner, fixedReward);
-
         // Distribute bet winnings if bets were placed
         if (game.betsLocked && game.betAmount > 0) {
             address winnerBet = (winner == game.player1) ? game.whiteBet : game.blackBet;
             uint256 totalPot = game.betAmount * 2; // Both players' bets
-            magnusToken.transfer(winnerBet, totalPot);
+            payable(winnerBet).transfer(totalPot);
         }
 
         // Distribute spectator bet winnings
@@ -209,19 +188,6 @@ contract ChessGame is Ownable {
         }
 
         emit GameFinished(gameId, winner);
-    }
-
-    /**
-     * @dev Allows the contract owner to mint new tokens to a specified address.
-     * This is an administrative function and should be used with caution.
-     * @param recipient The address to receive the newly minted tokens.
-     * @param amount The amount of tokens to mint (in wei).
-     */
-    function adminMint(address recipient, uint256 amount) public onlyOwner {
-        require(recipient != address(0), "Cannot mint to the zero address");
-        require(amount > 0, "Amount must be greater than zero");
-        magnusToken.mint(recipient, amount);
-        emit AdminMint(recipient, amount);
     }
 
     /**
@@ -241,7 +207,7 @@ contract ChessGame is Ownable {
             for (uint i = 0; i < game.spectatorBets.length; i++) {
                 SpectatorBet storage bet = game.spectatorBets[i];
                 if (!bet.isPaid) {
-                    magnusToken.transfer(bet.spectator, bet.amount);
+                    payable(bet.spectator).transfer(bet.amount);
                     bet.isPaid = true;
                 }
             }
@@ -260,7 +226,7 @@ contract ChessGame is Ownable {
                 if (bet.isWhite == whiteWon) {
                     // Winner - calculate proportional reward
                     uint256 reward = (bet.amount * netPot) / winningSideTotal;
-                    magnusToken.transfer(bet.spectator, reward);
+                    payable(bet.spectator).transfer(reward);
                 }
                 bet.isPaid = true;
             }
@@ -315,8 +281,8 @@ contract ChessGame is Ownable {
      * @dev Allows the owner to withdraw accumulated house fees.
      */
     function withdrawHouseFees() public onlyOwner {
-        uint256 balance = magnusToken.balanceOf(address(this));
+        uint256 balance = address(this).balance;
         require(balance > 0, "No fees to withdraw");
-        magnusToken.transfer(owner(), balance);
+        payable(owner()).transfer(balance);
     }
-} 
+}
