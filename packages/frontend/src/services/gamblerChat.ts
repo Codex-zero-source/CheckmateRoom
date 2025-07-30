@@ -1,6 +1,6 @@
 interface GameState {
   isGameActive: boolean;
-  currentStakes: number;
+  currentStakes: bigint;
   playerColor: string | null;
   gameOver: string;
   moveCount: number;
@@ -192,9 +192,9 @@ class HousePersonality {
     return this.getRandomFrom(this.houseGreetings);
   }
 
-  getGameStartMessage(stakes: number): string {
+  getGameStartMessage(stakes: bigint): string {
     const message = this.getRandomFrom(this.houseGameStartMessages);
-    return stakes > 0 ? `${message} The House sees ${stakes} MAG on the line!` : message;
+    return stakes > 0n ? `${message} The House sees ${stakes.toString()} STT on the line!` : message;
   }
 
   // Puzzle-specific methods
@@ -258,9 +258,9 @@ class HousePersonality {
     }
   }
 
-  getStakesChangeMessage(stakes: number): string {
+  getStakesChangeMessage(stakes: bigint): string {
     const message = this.getRandomFrom(this.stakesChangeMessages);
-    return stakes > 0 ? `${message} Current pot: ${stakes} MAG!` : message;
+    return stakes > 0n ? `${message} Current pot: ${stakes.toString()} STT!` : message;
   }
 
   getEncouragementMessage(moveCount: number): string {
@@ -287,4 +287,4 @@ class HousePersonality {
   }
 }
 
-export const housePersonality = new HousePersonality(); 
+export const housePersonality = new HousePersonality();

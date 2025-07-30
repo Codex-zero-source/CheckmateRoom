@@ -89,11 +89,10 @@ The system is built around event-driven patterns:
 - **Privacy-First**: User API keys stored locally, not on servers
 
 ### Database Strategy
-**Decision**: MongoDB for primary data, Redis for caching
+**Decision**: Redis for all data
 **Rationale**:
-- MongoDB handles complex game state and user profiles
-- Redis provides fast access for active game sessions
-- Separate concerns: persistence vs. performance
+- Redis provides a simple and fast in-memory database solution.
+- For the scope of this project, a single Redis instance is sufficient for both caching and persistence.
 
 ## Architecture Patterns
 
@@ -144,10 +143,6 @@ WAITING → ACTIVE → COMPLETED
 ```
 
 ### Smart Contract Patterns
-
-**Ownership Pattern:**
-- OpenZeppelin Ownable for admin functions
-- Role-based permissions for different operations
 
 **Pull Payment Pattern:**
 - Players/spectators withdraw winnings

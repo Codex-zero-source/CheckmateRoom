@@ -2,27 +2,16 @@ import { useState, useEffect } from 'react';
 import { Contract } from 'ethers';
 import socketService from '../services/socketService';
 import Game from '../components/Chessboard';
-import GameInfo from '../components/GameInfo';
+import GameDetails from '../components/GameInfo'; // Renamed from GameInfo
 import Lobby from '../components/Lobby';
 import TimeControlSelector from '../components/TimeControlSelector';
 import { ethers } from 'ethers';
+import type { GameInfo } from '../../../shared/types'; // Import shared GameInfo as a type
 import './PlayPage.css';
 
 interface PlayPageProps {
     chessGameContract: Contract | null;
     userAccount: string | null;
-}
-
-interface GameInfo {
-  gameId: string;
-  whitePlayer: string | null;
-  blackPlayer: string | null;
-  stakes: number;
-  timeControl: number;
-  increment: number;
-  isFull: boolean;
-  isStarted: boolean;
-  spectatorCount?: number;
 }
 
 const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
@@ -31,7 +20,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
     const [gameOver, setGameOver] = useState('');
     const [playerColor, setPlayerColor] = useState<'white' | 'black' | null>(null);
     const [lobbyGames, setLobbyGames] = useState<GameInfo[]>([]);
-    const [currentStakes, setCurrentStakes] = useState(0);
+    const [currentStakes, setCurrentStakes] = useState(0n);
     const [isCreatingGame, setIsCreatingGame] = useState(false);
     const [showTimeControlSelector, setShowTimeControlSelector] = useState(false);
     const [connectionState, setConnectionState] = useState(socketService.getConnectionState());
@@ -65,12 +54,8 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
 
         if (!socketService.isConnected()) {
             setStatus('Connecting to server...');
-            try {
-                await socketService.connect();
-            } catch (error) {
-                setStatus('Failed to connect to server. Please try again.');
-                return;
-            }
+            // The connection is now handled by App.tsx
+            return;
         }
 
         setIsCreatingGame(true);
@@ -100,12 +85,12 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                 
                 // Set stakes for the game
                 if (stakes > 0n) {
-                    socketService.emit('setStakes', { gameId: newGameId, amount: Number(stakes) });
+                    socketService.emit('setStakes', { gameId: newGameId, amount: stakes.toString() });
                 }
                 
                 setGameId(newGameId);
                 setPlayerColor('white'); // Creator is always white initially
-                setCurrentStakes(Number(stakes));
+                setCurrentStakes(stakes);
                 setStatus(`Game #${newGameId} created! Waiting for opponent to join...`);
                 setShowTimeControlSelector(false);
             } else {
@@ -127,13 +112,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
 
         if (!socketService.isConnected()) {
             setStatus('Connecting to server...');
-            socketService.connect().then(() => {
-                setGameId(gameId);
-                socketService.emit('joinGame', { gameId: gameId, walletAddress: userAccount });
-                setStatus(`Joining game ${gameId}...`);
-            }).catch(() => {
-                setStatus('Failed to connect to server. Please try again.');
-            });
+            // The connection is now handled by App.tsx
             return;
         }
 
@@ -154,12 +133,12 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
 
     // Socket event listeners
     useEffect(() => {
-        socketService.on('gameJoined', (data) => {
+        socketService.on('gameJoined', (data: { gameId: string; color: 'white' | 'black' }) => {
         setPlayerColor(data.color);
         setStatus(`Joined game ${data.gameId} as ${data.color}. ${data.color === 'white' ? 'You go first!' : 'Waiting for white to move...'}`);
     });
 
-        socketService.on('error', (data) => {
+        socketService.on('error', (data: { message: string }) => {
         setStatus(`Error: ${data.message}`);
         if (data.message.includes('Wallet must be connected') || data.message.includes('Game is full')) {
             setGameId(null);
@@ -167,20 +146,20 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         }
     });
 
-        socketService.on('gameState', (data) => {
+        socketService.on('gameState', (data: { gameId: string; players: { white: string; black: string } }) => {
         setStatus(`Game ${data.gameId} - ${data.players.white ? 'White joined' : 'Waiting for white'} | ${data.players.black ? 'Black joined' : 'Waiting for black'}`);
     });
 
-        socketService.on('lobbyUpdate', (data) => {
+        socketService.on('lobbyUpdate', (data: { games: GameInfo[] }) => {
         setLobbyGames(data.games);
     });
 
-        socketService.on('stakesUpdated', (data) => {
+        socketService.on('stakesUpdated', (data: { amount: bigint }) => {
         setCurrentStakes(data.amount);
         setStatus('Stakes updated.');
     });
 
-        socketService.on('gameCreated', (data) => {
+        socketService.on('gameCreated', (data: { gameId: string }) => {
             setStatus(`Game ${data.gameId} created successfully!`);
         });
 
@@ -212,7 +191,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                         currentStakes={currentStakes}
                     />
                     <div className="side-panel">
-                        <GameInfo 
+                        <GameDetails 
                             gameId={parseInt(gameId)}
                             status={status}
                             gameOver={gameOver}
@@ -287,7 +266,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                                 <p>Please connect your wallet to create games, join matches, and place bets.</p>
                                 <div className="warning-features">
                                     <span>🔐 Secure Transactions</span>
-                                    <span>💰 Bet with $MAG Tokens</span>
+                                    <span>💰 Bet with STT Tokens</span>
                                     <span>🏆 Earn Rewards</span>
                                 </div>
                             </div>
@@ -307,4 +286,4 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
     );
 };
 
-export default PlayPage; 
+export default PlayPage;

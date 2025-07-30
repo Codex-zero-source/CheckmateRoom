@@ -8,7 +8,6 @@ interface SpectatorBettingProps {
     totalWhiteBets: number;
     totalBlackBets: number;
     betsLocked: boolean;
-    updateBalance: () => void;
 }
 
 const SpectatorBetting: React.FC<SpectatorBettingProps> = ({
@@ -17,8 +16,7 @@ const SpectatorBetting: React.FC<SpectatorBettingProps> = ({
     userAccount,
     totalWhiteBets,
     totalBlackBets,
-    betsLocked,
-    updateBalance
+    betsLocked
 }) => {
     const [betAmount, setBetAmount] = useState('');
     const [betOnWhite, setBetOnWhite] = useState(true);
@@ -36,10 +34,9 @@ const SpectatorBetting: React.FC<SpectatorBettingProps> = ({
 
         try {
             const amountInWei = ethers.parseUnits(betAmount, 18);
-            const tx = await chessGameContract.placeSpectatorBet(gameId, amountInWei, betOnWhite);
+            const tx = await chessGameContract.placeSpectatorBet(gameId, betOnWhite, { value: amountInWei });
             await tx.wait();
             setStatus('Bet placed successfully!');
-            updateBalance();
         } catch (err: any) {
             console.error('Betting failed:', err);
             setError(err.reason || 'An unknown error occurred.');
@@ -55,14 +52,14 @@ const SpectatorBetting: React.FC<SpectatorBettingProps> = ({
             ) : (
                 <>
                     <div className="betting-pools">
-                        <p>White Pool: {ethers.formatUnits(totalWhiteBets, 18)} MAG</p>
-                        <p>Black Pool: {ethers.formatUnits(totalBlackBets, 18)} MAG</p>
+                        <p>White Pool: {ethers.formatUnits(totalWhiteBets, 18)} STT</p>
+                        <p>Black Pool: {ethers.formatUnits(totalBlackBets, 18)} STT</p>
                     </div>
                     <input
                         type="number"
                         value={betAmount}
                         onChange={(e) => setBetAmount(e.target.value)}
-                        placeholder="Amount in MAG"
+                        placeholder="Amount in STT"
                         disabled={!userAccount}
                     />
                     <div className="bet-selection">
@@ -90,4 +87,4 @@ const SpectatorBetting: React.FC<SpectatorBettingProps> = ({
     );
 };
 
-export default SpectatorBetting; 
+export default SpectatorBetting;

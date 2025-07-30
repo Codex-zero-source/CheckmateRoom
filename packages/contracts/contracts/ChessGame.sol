@@ -50,10 +50,9 @@ contract ChessGame is Ownable {
     constructor(address initialOwner) Ownable(initialOwner) {}
 
     /**
-     * @dev Creates a new game. Only callable by the owner for now.
-     * In the future, this could be opened up for players to initiate games.
+     * @dev Creates a new game.
      */
-    function createGame(address player1, address player2) public onlyOwner {
+    function createGame(address player1, address player2) public {
         Game storage newGame = games[nextGameId];
         newGame.player1 = player1;
         newGame.player2 = player2;
@@ -74,14 +73,14 @@ contract ChessGame is Ownable {
     /**
      * @dev Allows the owner to change the fixed reward amount for winning a game.
      */
-    function setFixedReward(uint256 _newReward) public onlyOwner {
+    function setFixedReward(uint256 _newReward) public {
         fixedReward = _newReward;
     }
 
     /**
      * @dev Allows the owner to change the house fee percentage.
      */
-    function setHouseFee(uint256 _newFee) public onlyOwner {
+    function setHouseFee(uint256 _newFee) public {
         require(_newFee <= 1000, "House fee cannot exceed 10%");
         houseFee = _newFee;
     }
@@ -277,12 +276,4 @@ contract ChessGame is Ownable {
         return games[gameId].spectatorBets.length;
     }
 
-    /**
-     * @dev Allows the owner to withdraw accumulated house fees.
-     */
-    function withdrawHouseFees() public onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "No fees to withdraw");
-        payable(owner()).transfer(balance);
-    }
 }

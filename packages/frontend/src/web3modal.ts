@@ -12,12 +12,12 @@ const mainnet = {
   rpcUrl: 'https://cloudflare-eth.com'
 }
 
-const fuji = {
-    chainId: 43113,
-    name: 'Avalanche Fuji',
-    currency: 'AVAX',
-    explorerUrl: 'https://testnet.snowtrace.io',
-    rpcUrl: 'https://api.avax-test.network/ext/bc/C/rpc'
+const somnia = {
+    chainId: 50312,
+    name: 'Somnia Testnet',
+    currency: 'STT',
+    explorerUrl: 'https://explorer.somnia.network', // Placeholder, actual explorer URL might differ
+    rpcUrl: 'https://rpc.somnia.network' // Placeholder, actual RPC URL might differ
 }
 
 // 3. Create a metadata object
@@ -37,14 +37,14 @@ const ethersConfig = defaultConfig({
   enableEIP6963: true, // true by default
   enableInjected: true, // true by default
   enableCoinbase: true, // true by default
-  rpcUrl: '...', // used for the Coinbase SDK
-  defaultChainId: 43113, // used for the Coinbase SDK
+  rpcUrl: 'https://rpc.somnia.network', // used for the Coinbase SDK
+  defaultChainId: 50312, // used for the Coinbase SDK
 })
 
 // 5. Create a Web3Modal instance
 createWeb3Modal({
   ethersConfig,
-  chains: [fuji, mainnet],
+  chains: [somnia, mainnet],
   projectId,
   enableAnalytics: true // Optional - defaults to your Cloud configuration
-}) 
+})

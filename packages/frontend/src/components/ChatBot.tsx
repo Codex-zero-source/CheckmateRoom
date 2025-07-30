@@ -40,7 +40,7 @@ const TypewriterMessage: React.FC<TypewriterMessageProps> = ({ text, onComplete,
 interface ChatBotProps {
   gameState?: {
     isGameActive: boolean;
-    currentStakes: number;
+    currentStakes: bigint;
     playerColor: string | null;
     gameOver: string;
     moveCount: number;
@@ -250,4 +250,4 @@ const ChatBot: React.FC<ChatBotProps> = ({
   );
 };
 
-export default ChatBot; 
+export default ChatBot;

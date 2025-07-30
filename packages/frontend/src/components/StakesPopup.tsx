@@ -4,23 +4,23 @@ import { ethers } from 'ethers';
 interface StakesPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (amount: number) => void;
-  currentStakes?: number;
+  onConfirm: (amount: bigint) => void;
+  currentStakes?: bigint;
 }
 
 const StakesPopup: React.FC<StakesPopupProps> = ({ 
   isOpen, 
   onClose, 
   onConfirm, 
-  currentStakes = 0 
+  currentStakes = 0n 
 }) => {
-  const [selectedAmount, setSelectedAmount] = useState<number>(currentStakes);
+  const [selectedAmount, setSelectedAmount] = useState<bigint>(currentStakes);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
   const predefinedAmounts = [10, 20, 50, 100];
 
-  const handleAmountSelect = (amount: number) => {
+  const handleAmountSelect = (amount: bigint) => {
     setSelectedAmount(amount);
     setIsCustom(false);
     setCustomAmount('');
@@ -44,7 +44,7 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
   const handleCustomToggle = () => {
     setIsCustom(!isCustom);
     if (!isCustom) {
-      setSelectedAmount(0);
+      setSelectedAmount(0n);
     }
   };
 
@@ -60,7 +60,7 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
         
         <div className="stakes-popup-content">
           <p className="stakes-description">
-            Choose the amount of $MAG tokens to stake for this game. 
+            Choose the amount of STT tokens to stake for this game. 
             The winner takes the pot!
           </p>
           
@@ -71,7 +71,7 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
                 className={`stake-option ${selectedAmount === ethers.parseEther(amount.toString()) && !isCustom ? 'selected' : ''}`}
                 onClick={() => handleAmountSelect(ethers.parseEther(amount.toString()))}
               >
-                {amount} $MAG
+                {amount} STT
               </button>
             ))}
             
@@ -85,7 +85,7 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
           
           {isCustom && (
             <div className="custom-amount-input">
-              <label htmlFor="customAmount">Custom Amount ($MAG):</label>
+              <label htmlFor="customAmount">Custom Amount (STT):</label>
               <input
                 id="customAmount"
                 type="number"
@@ -100,7 +100,7 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
           
           {selectedAmount > 0 && (
             <div className="selected-stakes">
-              <p>Selected stakes: <strong>{ethers.formatEther(selectedAmount)} $MAG</strong></p>
+              <p>Selected stakes: <strong>{ethers.formatEther(selectedAmount)} STT</strong></p>
             </div>
           )}
         </div>
@@ -122,4 +122,4 @@ const StakesPopup: React.FC<StakesPopupProps> = ({
   );
 };
 
-export default StakesPopup; 
+export default StakesPopup;

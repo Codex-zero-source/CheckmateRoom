@@ -1,45 +1,44 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { createClient } from 'redis';
+import { DATABASE_URL } from '../config/env';
 
-export interface IUser extends Document {
+const redisClient = createClient({ url: DATABASE_URL });
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+
+(async () => {
+  await redisClient.connect();
+})();
+
+export interface IUser {
   walletAddress: string;
   username: string;
   createdAt: Date;
   lastLogin: Date;
 }
 
-const UserSchema: Schema = new Schema({
-  walletAddress: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true,
-    lowercase: true,
+export const User = {
+  async findOne({ walletAddress }: { walletAddress: string }): Promise<IUser | null> {
+    const userJson = await redisClient.get(`user:${walletAddress.toLowerCase()}`);
+    if (userJson) {
+      return JSON.parse(userJson);
+    }
+    return null;
   },
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: 3,
-    maxlength: 20,
-    trim: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  lastLogin: {
-    type: Date,
-    default: Date.now,
-  },
-});
 
-// Update lastLogin on each save
-UserSchema.pre<IUser>('save', function (this: IUser, next) {
-  if (this.isModified('walletAddress') && !this.isNew) {
-    return next(new Error('Cannot change wallet address.'));
+  async create(userData: { walletAddress: string; username: string }): Promise<IUser> {
+    const newUser: IUser = {
+      ...userData,
+      walletAddress: userData.walletAddress.toLowerCase(),
+      createdAt: new Date(),
+      lastLogin: new Date(),
+    };
+    await redisClient.set(`user:${newUser.walletAddress}`, JSON.stringify(newUser));
+    return newUser;
+  },
+
+  async save(user: IUser): Promise<IUser> {
+    user.lastLogin = new Date();
+    await redisClient.set(`user:${user.walletAddress.toLowerCase()}`, JSON.stringify(user));
+    return user;
   }
-  this.lastLogin = new Date();
-  next();
-});
-
-export default mongoose.model<IUser>('User', UserSchema); 
+};

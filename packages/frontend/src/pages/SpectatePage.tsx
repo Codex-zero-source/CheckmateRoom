@@ -24,14 +24,12 @@ interface SpectatePageProps {
     chessGameContract: Contract | null;
     userAccount: string | null;
     isConnected: boolean;
-    updateBalance: () => void;
 }
 
 const SpectatePage: React.FC<SpectatePageProps> = ({
     chessGameContract,
     userAccount,
-    isConnected,
-    updateBalance
+    isConnected
 }) => {
     const { gameId } = useParams<{ gameId: string }>();
     const navigate = useNavigate();
@@ -60,7 +58,6 @@ const SpectatePage: React.FC<SpectatePageProps> = ({
         socket.on('gameOver', (data) => {
             setGameOver(data.reason);
             setGameState(prev => prev ? { ...prev, isFinished: true } : null);
-            updateBalance();
         });
 
         return () => {
@@ -69,7 +66,7 @@ const SpectatePage: React.FC<SpectatePageProps> = ({
             socket.off('gameState');
             socket.off('gameOver');
         };
-    }, [gameId, navigate, socket, updateBalance]);
+    }, [gameId, navigate, socket]);
 
     const formatAddress = (address: string) => {
         return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '...';
@@ -140,7 +137,6 @@ const SpectatePage: React.FC<SpectatePageProps> = ({
                         totalWhiteBets={gameState.totalWhiteBets}
                         totalBlackBets={gameState.totalBlackBets}
                         betsLocked={gameState.betsLocked}
-                        updateBalance={updateBalance}
                     />
                 )}
 
@@ -156,4 +152,4 @@ const SpectatePage: React.FC<SpectatePageProps> = ({
     );
 };
 
-export default SpectatePage; 
+export default SpectatePage;

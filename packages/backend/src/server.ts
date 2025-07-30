@@ -2,12 +2,12 @@ import 'dotenv/config';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import userRoutes from './routes/user.routes';
+import authRoutes from './routes/auth.routes';
 import { initSocket } from './socket/socket';
 import { initGameService } from './services/game.service';
 import { createClient } from 'redis';
@@ -16,7 +16,6 @@ import {
     SERVER_PORT, 
     SERVER_HOST, 
     SOCKET_CORS_ORIGIN,
-    ADMIN_WALLET_ADDRESS,
     DATABASE_URL,
     JWT_SECRET
 } from './config/env';
@@ -48,11 +47,12 @@ async function main() {
     app.use('/api/', apiLimiter);
 
     // --- Database Connection ---
+    const redisClient = createClient({ url: DATABASE_URL });
     try {
-        await mongoose.connect(DATABASE_URL!);
-        console.log('✅ MongoDB connected successfully.');
+        await redisClient.connect();
+        console.log('✅ Redis connected successfully.');
     } catch (err) {
-        console.error('❌ MongoDB connection error:', err);
+        console.error('❌ Redis connection error:', err);
         process.exit(1); // Exit if cannot connect to DB
     }
 
@@ -80,7 +80,7 @@ async function main() {
         allowEIO3: true,
     });
     
-    const pubClient = createClient({ url: 'redis://redis:6379' });
+    const pubClient = createClient({ url: 'redis://localhost:6379' });
     const subClient = pubClient.duplicate();
 
     try {
@@ -142,20 +142,19 @@ async function main() {
     app.get('/health', (req, res) => {
         res.json({ 
             status: 'OK', 
-            timestamp: new Date().toISOString(),
-            adminAddress: ADMIN_WALLET_ADDRESS
+            timestamp: new Date().toISOString()
         });
     });
 
     // --- API Endpoints for User management ---
     app.use('/api/user', userRoutes);
+    app.use('/api/auth', authRoutes);
 
     // Start server
     const PORT = Number(process.env.PORT) || SERVER_PORT;
 
     server.listen(PORT, () => {
         console.log(`🚀 Magnus Chess Server running on http://${SERVER_HOST}:${PORT}`);
-        console.log(`📊 Admin Wallet: ${ADMIN_WALLET_ADDRESS}`);
         console.log(`🌐 CORS Origin: ${SOCKET_CORS_ORIGIN}`);
         console.log(`🔌 Socket.IO configured with Redis adapter`);
     });
@@ -164,4 +163,4 @@ async function main() {
 main().catch(err => {
     console.error("FATAL ERROR in main execution:", err);
     process.exit(1);
-}); 
+});

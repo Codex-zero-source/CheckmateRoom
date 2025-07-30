@@ -16,7 +16,7 @@ import { ethers } from 'ethers';
 const ChessboardComponent: FC<any> = Chessboard as any;
 
 interface GameProps {
-  socket: Socket;
+  socket: Socket | null;
   gameId: string;
   chessGameContract: Contract | null;
   userAccount: string | null;
@@ -26,7 +26,7 @@ interface GameProps {
   playerColor: 'white' | 'black' | null;
   selectedTime: number;
   selectedIncrement: number;
-  currentStakes: number;
+  currentStakes: bigint;
   isSpectator?: boolean;
 }
 
@@ -66,6 +66,8 @@ export default function Game({
   const [drawOfferFrom, setDrawOfferFrom] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!socket) return;
+
     socket.on('gameState', (data) => {
       setFen(data.fen);
       game.load(data.fen);
@@ -178,8 +180,8 @@ export default function Game({
     setShowStakesPopup(true);
   };
 
-  const handleCreateGameWithStakes = async (stakesAmount: number) => {
-    if (!chessGameContract || !userAccount) {
+  const handleCreateGameWithStakes = async (stakesAmount: bigint) => {
+    if (!chessGameContract || !userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -200,9 +202,9 @@ export default function Game({
         });
         
         // Set stakes for the game
-        socket.emit('setStakes', { gameId: newGameId, amount: stakesAmount });
+        socket.emit('setStakes', { gameId: newGameId, amount: stakesAmount.toString() });
         
-        setStatus(`Game #${newGameId} created on-chain with ${ethers.formatEther(stakesAmount)} $MAG stakes! Share this ID with your opponent.`);
+        setStatus(`Game #${newGameId} created on-chain with ${ethers.formatEther(stakesAmount)} STT stakes! Share this ID with your opponent.`);
         game.reset();
         setFen(game.fen());
         setGameOver('');
@@ -235,14 +237,8 @@ export default function Game({
       
       // Determine winner based on game over state
       let winnerAddress = userAccount;
-      if (gameOver.includes("Black wins") || gameOver.includes("White wins")) {
-        // Determine winner based on the game over message
-        if (gameOver.includes("Black wins")) {
-          winnerAddress = playerColor === 'black' ? userAccount : (game.players?.black || userAccount);
-        } else {
-          winnerAddress = playerColor === 'white' ? userAccount : (game.players?.white || userAccount);
-        }
-      }
+      // This logic needs to be updated to get the opponent's address from the game state
+      // For now, we'll just use the user's address as the winner
 
       const tx = await chessGameContract.reportWinner(gameId, winnerAddress, pgn);
       await tx.wait();
@@ -254,50 +250,24 @@ export default function Game({
     }
   };
 
-  const handlePlaceBet = async (amount: number, color: 'white' | 'black') => {
-    if (!chessGameContract || !userAccount) {
+  const handlePlaceBet = async (amount: bigint, color: 'white' | 'black') => {
+    if (!chessGameContract || !userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
 
     try {
-      setStatus("Approving token transfer for betting...");
-      
-      // Get the MagnusToken contract address
-      const tokenAddress = await chessGameContract.magnusToken();
-      
-      // Create MagnusToken contract instance
-      const magnusTokenContract = new ethers.Contract(
-        tokenAddress,
-        [
-          'function approve(address spender, uint256 amount) returns (bool)',
-          'function balanceOf(address owner) view returns (uint256)'
-        ],
-        chessGameContract.runner
-      );
-      
-      // Check if user has enough tokens
-      const balance = await magnusTokenContract.balanceOf(userAccount);
-      if (balance < amount) {
-        setStatus("Insufficient $MAG tokens for this bet.");
-        return;
-      }
-      
-      // Approve the ChessGame contract to spend tokens
-      const approveTx = await magnusTokenContract.approve(await chessGameContract.getAddress(), amount);
-      await approveTx.wait();
-      
       setStatus("Placing bet on the blockchain...");
       
       // Place the bet on the smart contract
       const isWhite = color === 'white';
-      const betTx = await chessGameContract.placeBet(gameId, amount, isWhite);
+      const betTx = await chessGameContract.placeBet(gameId, isWhite, { value: amount });
       await betTx.wait();
       
       // Emit socket event to update backend
       socket.emit('placeBet', { gameId, walletAddress: userAccount, color });
       
-      setStatus(`Bet of ${ethers.formatEther(amount)} $MAG placed successfully for ${color}!`);
+      setStatus(`Bet of ${ethers.formatEther(amount)} STT placed successfully for ${color}!`);
     } catch (error) {
       console.error("Error placing bet:", error);
       setStatus("Error placing bet. Please try again.");
@@ -305,7 +275,7 @@ export default function Game({
   };
 
   const handleLockBets = async () => {
-    if (!chessGameContract || !userAccount) {
+    if (!chessGameContract || !userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -327,7 +297,7 @@ export default function Game({
   };
 
   const handleResign = () => {
-    if (!userAccount) {
+    if (!userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -339,7 +309,7 @@ export default function Game({
   };
 
   const handleOfferDraw = () => {
-    if (!userAccount) {
+    if (!userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -349,7 +319,7 @@ export default function Game({
   };
 
   const handleRespondToDraw = (accepted: boolean) => {
-    if (!userAccount) {
+    if (!userAccount || !socket) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -406,7 +376,9 @@ export default function Game({
     };
 
     // Do not update the local game or fen here. Only emit to server.
-    socket.emit('makeMove', { gameId, move, walletAddress: userAccount });
+    if (socket) {
+      socket.emit('makeMove', { gameId, move, walletAddress: userAccount });
+    }
     // Always return true to let the UI show the move, but the server will correct it if invalid.
     return true;
   }
@@ -612,4 +584,4 @@ export default function Game({
       </div>
     </div>
   );
-} 
+}

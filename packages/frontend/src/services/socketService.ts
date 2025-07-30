@@ -2,13 +2,15 @@ import { io, Socket } from 'socket.io-client';
 import { BACKEND_URL } from '../config/env';
 
 // Connection states
-export enum ConnectionState {
-    DISCONNECTED = 'disconnected',
-    CONNECTING = 'connecting',
-    CONNECTED = 'connected',
-    RECONNECTING = 'reconnecting',
-    ERROR = 'error'
-}
+export const ConnectionState = {
+    DISCONNECTED: 'disconnected',
+    CONNECTING: 'connecting',
+    CONNECTED: 'connected',
+    RECONNECTING: 'reconnecting',
+    ERROR: 'error'
+} as const;
+
+export type ConnectionState = typeof ConnectionState[keyof typeof ConnectionState];
 
 // Socket event types
 export interface SocketEvents {
@@ -114,12 +116,30 @@ class SocketService {
     }
 
     // Connect to the server
-    public connect(): Promise<void> {
+    public connect(walletAddress: string, token: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!this.socket) {
-                reject(new Error('Socket not initialized'));
-                return;
+            if (this.socket) {
+                this.socket.disconnect();
             }
+
+            this.socket = io(BACKEND_URL, {
+                auth: {
+                    walletAddress,
+                    token,
+                },
+                transports: ['websocket', 'polling'],
+                upgrade: true,
+                rememberUpgrade: true,
+                timeout: 20000,
+                forceNew: true,
+                reconnection: true,
+                reconnectionAttempts: this.maxReconnectAttempts,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                autoConnect: false
+            });
+
+            this.setupEventHandlers();
 
             if (this.connectionState === ConnectionState.CONNECTED) {
                 resolve();
@@ -169,7 +189,7 @@ class SocketService {
     }
 
     // Listen to an event from the server
-    public on(event: string, callback: Function): void {
+    public on(event: string, callback: (...args: any[]) => void): void {
         if (!this.socket) return;
 
         if (!this.eventListeners.has(event)) {
@@ -181,7 +201,7 @@ class SocketService {
     }
 
     // Remove event listener
-    public off(event: string, callback?: Function): void {
+    public off(event: string, callback?: (...args: any[]) => void): void {
         if (!this.socket) return;
 
         if (callback) {
@@ -265,10 +285,6 @@ class SocketService {
 // Create singleton instance
 const socketService = new SocketService();
 
-// Auto-connect when the service is imported
-socketService.connect().catch(error => {
-    console.error('Failed to connect to socket server:', error);
-});
 
 // Cleanup on page unload
 if (typeof window !== 'undefined') {
@@ -277,4 +293,4 @@ if (typeof window !== 'undefined') {
     });
 }
 
-export default socketService; 
+export default socketService;

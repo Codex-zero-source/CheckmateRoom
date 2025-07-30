@@ -1,24 +1,43 @@
 # Active Context
 
 ## Current Work Focus
-*   **Blockchain Migration to Somnia Network**: Refactoring the smart contracts to use the native Somnia test token (STT) instead of a custom ERC20 token.
+*   **Frontend Module Resolution**: Fixing the `Failed to resolve import "../../shared/types"` error in the frontend.
 
 ## Recent Changes
-*   `hardhat.config.ts` updated with Somnia network configuration.
-*   `.env` updated with Somnia RPC URL and private key.
-*   `MagnusToken.sol` and `MagnusToken.ts` deployment script removed.
-*   `ChessGame.sol` refactored to use native STT for transactions (removed MagnusToken import, made functions payable, used msg.value, removed adminMint, updated transfers). Docstring errors fixed.
-*   `DeployChess.ts` updated to deploy only `ChessGame.sol`.
-*   Attempted to deploy `ChessGame.sol` to Somnia testnet, but it failed with "ProviderError: account does not exist".
+*   Created `packages/shared/types.ts` to define a shared `GameInfo` interface.
+*   Updated `packages/frontend/src/pages/PlayPage.tsx` to use the shared `GameInfo` interface.
+*   Updated `packages/backend/src/socket/game.handler.ts` to convert `stakes.amount` to a string for JSON serialization when sending `lobbyUpdate` events.
+*   Updated `packages/backend/tsconfig.json` to target `es2020` for `bigint` support.
+*   Updated `packages/backend/src/services/game.service.ts` to use `bigint` for `stakes.amount` in the `GameRoom` interface.
+*   Updated `packages/frontend/tsconfig.app.json` to include a path mapping for `packages/shared`.
+*   Updated `packages/frontend/vite.config.ts` to explicitly map `../../shared/types` to the correct absolute path (removed `.ts` extension from alias).
+*   Verified that `packages/shared/types.ts` exists.
+*   Cleared Vite cache in `packages/frontend/node_modules/.vite`.
 
 ## Next Steps
-*   **Requires User Intervention**: The deployment to Somnia testnet failed with "ProviderError: account does not exist". This indicates an issue with the private key configuration or funding on the Somnia network. Need user assistance to debug this deployment issue.
-*   Update backend and frontend to interact with Somnia network (after contracts are deployed).
+*   Run `npm install` in the root directory to ensure all dependencies and symlinks are correctly set up.
+*   Implement game lobby display and joining logic in the frontend.
+*   Ensure backend game state management with `chess.js`.
+*   Implement real-time move validation and updates.
+*   Implement backend timers and synchronization.
+*   Ensure chessboard updates correctly with game state.
+*   Implement move history display.
+*   Display player information and timers.
+*   Thoroughly test all new features.
 
 ## Important Patterns and Preferences
-*   The project is migrating from Avalanche to Somnia.
-*   The project will use the native Somnia test token (STT) for all transactions, removing the need for the `MagnusToken` ERC20 contract.
-*   The user prefers to keep the project simple and chess-centered.
+*   The project will use a unique game ID for each game.
+*   Real-time updates will be handled via Socket.IO.
+*   Game state will be managed on the backend using Redis.
+*   Shared types are used for consistency between frontend and backend.
+*   TypeScript path mapping and Vite aliases are essential for monorepo setups to resolve shared module imports.
+*   Vite caching can sometimes interfere with module resolution, requiring manual cache clearing.
+*   Proper `npm workspaces` setup and `npm install` are critical for monorepo module resolution.
+*   Explicitly mapping full paths in Vite aliases can be necessary for specific module imports.
 
 ## Learnings and Project Insights
-*   The deployment error "ProviderError: account does not exist" is a persistent issue, suggesting a problem with the private key or account setup on the target network (Somnia).
+*   Consistent type definitions across frontend and backend are crucial for preventing type-related errors, especially when dealing with `bigint` values over JSON.
+*   TypeScript path mapping and Vite aliases are essential for monorepo setups to resolve shared module imports.
+*   Vite caching can sometimes interfere with module resolution, requiring manual cache clearing.
+*   Proper `npm workspaces` setup and `npm install` are critical for monorepo module resolution.
+*   Explicitly mapping full paths in Vite aliases can be necessary for specific module imports.

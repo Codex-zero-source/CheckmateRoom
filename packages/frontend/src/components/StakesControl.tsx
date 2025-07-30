@@ -12,12 +12,12 @@ const StakesControl: React.FC<StakesControlProps> = ({ onStakesChange, currentSt
   
   const presetAmounts = [
     { label: 'No Stakes', value: 0 },
-    { label: '10 MAG', value: ethers.parseEther('10') },
-    { label: '50 MAG', value: ethers.parseEther('50') },
-    { label: '100 MAG', value: ethers.parseEther('100') },
-    { label: '250 MAG', value: ethers.parseEther('250') },
-    { label: '500 MAG', value: ethers.parseEther('500') },
-    { label: '1000 MAG', value: ethers.parseEther('1000') }
+    { label: '10 STT', value: ethers.parseEther('10') },
+    { label: '50 STT', value: ethers.parseEther('50') },
+    { label: '100 STT', value: ethers.parseEther('100') },
+    { label: '250 STT', value: ethers.parseEther('250') },
+    { label: '500 STT', value: ethers.parseEther('500') },
+    { label: '1000 STT', value: ethers.parseEther('1000') }
   ];
 
   const handleCustomAmount = () => {
@@ -26,18 +26,18 @@ const StakesControl: React.FC<StakesControlProps> = ({ onStakesChange, currentSt
       onStakesChange(Number(amount));
       setCustomAmount('');
     } catch (error) {
-      alert('Please enter a valid MAGNUS token amount');
+      alert('Please enter a valid STT token amount');
     }
   };
 
   const formatStakes = (stakes: number): string => {
     if (stakes === 0) return 'No stakes';
-    return `${ethers.formatEther(stakes)} MAG`;
+    return `${ethers.formatEther(stakes)} STT`;
   };
 
   return (
     <div className="stakes-control">
-      <h3>Game Stakes ($MAGNUS)</h3>
+      <h3>Game Stakes (STT)</h3>
       <div className="current-stakes">
         <span className="label">Current Stakes:</span>
         <span className="value">{formatStakes(currentStakes)}</span>
@@ -61,7 +61,7 @@ const StakesControl: React.FC<StakesControlProps> = ({ onStakesChange, currentSt
           <div className="custom-amount">
             <input
               type="text"
-              placeholder="Custom amount (MAG)"
+              placeholder="Custom amount (STT)"
               value={customAmount}
               onChange={(e) => setCustomAmount(e.target.value)}
             />
@@ -73,4 +73,4 @@ const StakesControl: React.FC<StakesControlProps> = ({ onStakesChange, currentSt
   );
 };
 
-export default StakesControl; 
+export default StakesControl;

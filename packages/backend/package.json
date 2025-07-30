@@ -21,8 +21,6 @@
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.1",
-    "mongoose-cache": "^0.1.5",
     "redis": "^5.5.6",
     "socket.io": "^4.8.1"
   },

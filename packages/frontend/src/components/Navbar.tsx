@@ -1,40 +1,24 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useWeb3ModalAccount } from '@web3modal/ethers/react';
-import { ADMIN_WALLET_ADDRESS } from '../config/env';
 import './Navbar.css';
 
 interface NavbarProps {
     isConnected: boolean;
     userAddress: string | null;
-    tokenBalance: string | null;
     username: string | null;
 }
 
 // Cast NavLink to a compatible type for React Router v7
 const NavLinkComponent = NavLink as any;
 
-const Navbar = ({ isConnected, userAddress, tokenBalance, username }: NavbarProps) => {
+const Navbar = ({ isConnected, userAddress, username }: NavbarProps) => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [isAdmin, setIsAdmin] = useState(false);
 
     const getLinkClass = (path: string) => {
         return location.pathname === path ? 'navbar-link active' : 'navbar-link';
     };
-
-    // Check if connected wallet is admin
-    useEffect(() => {
-        if (userAddress && userAddress.toLowerCase() === ADMIN_WALLET_ADDRESS.toLowerCase()) {
-            setIsAdmin(true);
-            // Redirect to admin page if not already there
-            if (location.pathname !== '/admin') {
-                navigate('/admin');
-            }
-        } else {
-            setIsAdmin(false);
-            }
-    }, [userAddress, location.pathname, navigate]);
 
     const handleDisconnect = async () => {
         try {
@@ -45,7 +29,6 @@ const Navbar = ({ isConnected, userAddress, tokenBalance, username }: NavbarProp
             localStorage.removeItem('wagmi.account');
             localStorage.removeItem('wagmi.chainId');
             
-            setIsAdmin(false);
             // Redirect to home page after disconnect
             if (location.pathname === '/admin') {
                 navigate('/');
@@ -85,12 +68,8 @@ const Navbar = ({ isConnected, userAddress, tokenBalance, username }: NavbarProp
                                 {username ? (
                                     <span className="mono username-display">{username}</span>
                                 ) : (
-                                    <span className={`mono ${isAdmin ? 'admin-address' : ''}`}>
-                                        {isAdmin && '👑 '}
-                                        {formatAddress(userAddress)}
-                                    </span>
+                                    <span className="mono username-display">{formatAddress(userAddress)}</span>
                                 )}
-                            <span className="mono"> | $MAG: {parseFloat(tokenBalance || '0').toFixed(2)}</span>
                             </div>
                             <button 
                                 className="disconnect-btn"
@@ -109,4 +88,4 @@ const Navbar = ({ isConnected, userAddress, tokenBalance, username }: NavbarProp
     );
 };
 
-export default Navbar; 
+export default Navbar;

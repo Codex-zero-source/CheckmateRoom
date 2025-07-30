@@ -7,7 +7,7 @@ interface GameInfoProps {
     playerColor: 'white' | 'black' | null;
 }
 
-const GameInfo: FC<GameInfoProps> = ({ gameId, status, gameOver, playerColor }) => {
+const GameDetails: FC<GameInfoProps> = ({ gameId, status, gameOver, playerColor }) => {
     return (
         <div className="game-info">
             <h3>Game Status</h3>
@@ -39,4 +39,4 @@ const GameInfo: FC<GameInfoProps> = ({ gameId, status, gameOver, playerColor }) 
     );
 };
 
-export default GameInfo; 
+export default GameDetails;

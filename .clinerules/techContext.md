@@ -22,8 +22,7 @@ This document outlines the technologies, setup, and technical details of the Che
 ### Backend
 - **Framework**: Express.js with TypeScript
 - **Real-time Communication**: Socket.IO
-- **Database**: MongoDB with Mongoose
-- **Caching/Message Brokering**: Redis
+- **Database**: Redis
 - **Authentication**: JSON Web Tokens (JWT)
 - **Security**: Helmet, express-rate-limit
 - **Chess Logic**: `chess.js`
@@ -59,20 +58,19 @@ A `.env` file is required in the root directory with the following variables:
 # Backend Configuration
 PORT=3001
 HOST=localhost
-DATABASE_URL=mongodb://localhost:27017/chessxcrypto
-JWT_SECRET=your_jwt_secret
+DATABASE_URL=redis://localhost:6379
+JWT_SECRET=71ea1d6cad84ce7d21e09c831df45ee3
 SOCKET_CORS_ORIGIN=http://localhost:5173
 
 # Frontend Configuration
 BACKEND_URL=http://localhost:3001
 
 # Smart Contract Configuration
-FUJI_PRIVATE_KEY=your_fuji_testnet_private_key
-AVALANCHE_API_KEY=your_avalanche_explorer_api_key
+SOMNIA_PRIVATE_KEY=ae3c64da340e9288a66413556f76262fcc67bdd827ea65125dbae61468c2d062
+SOMNIA_API_KEY=your_somnia_explorer_api_key # Placeholder, as no specific API key was provided for Somnia explorer
 
-# Contract Addresses (Fuji Testnet)
-MAGNUS_TOKEN_ADDRESS=0x0264e02480D8549BE91541Fc8c12047335Ad1237
-CHESS_GAME_ADDRESS=0xe8aeA4505bBf1156cb9a76D86b8F2DC5ed11E6C8
+# Contract Addresses (Somnia Testnet)
+CHESS_GAME_ADDRESS=0x1EB8A3c03D6D7212bC50176cEa0eCc33F5f8a016
 
 # Admin Wallet Address
 ADMIN_WALLET_ADDRESS=0x32d35e6a1fddbc29ac11276a22bfad03aaa1dc83

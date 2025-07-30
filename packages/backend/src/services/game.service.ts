@@ -31,7 +31,7 @@ export interface GameRoom {
     };
     timerInterval: NodeJS.Timeout | null;
     stakes: {
-        amount: number;
+        amount: bigint;
         whiteBet: string | null;
         blackBet: string | null;
         isLocked: boolean;
@@ -180,4 +180,4 @@ export function switchTimer(gameId: string) {
         blackTime: game.timers.black,
         activePlayer: game.timers.activePlayer
     });
-} 
+}

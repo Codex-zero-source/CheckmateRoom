@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import Joi from 'joi';
 import { games, activeGameIds } from '../services/game.service';
 import { Chess } from 'chess.js';
-import User from '../models/User';
+import { User, IUser } from '../models/User';
 import { activeConnections } from '../services/connection.service';
 
 // Validation schema for creating a game
@@ -75,7 +75,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             },
             timerInterval: null,
             stakes: {
-                amount: 0,
+                amount: 0n,
                 whiteBet: null,
                 blackBet: null,
                 isLocked: false
@@ -102,7 +102,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             connection.walletAddress = walletAddress;
             connection.rooms.add(newId);
             
-            User.findOne({ walletAddress: walletAddress.toLowerCase() }).then(user => {
+            User.findOne({ walletAddress: walletAddress.toLowerCase() }).then((user: IUser | null) => {
                 if (user) {
                     (socket as any).username = user.username;
                     console.log(`User ${user.username} (${walletAddress}) authenticated for socket ${socket.id}`);
@@ -126,7 +126,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                     gameId,
                     whitePlayer: game.players.white || null,
                     blackPlayer: game.players.black || null,
-                    stakes: game.stakes.amount,
+                    stakes: game.stakes.amount.toString(), // Convert bigint to string for JSON serialization
                     timeControl: game.timers.timeControl / (60 * 1000),
                     increment: game.timers.increment / 1000,
                     isFull: !!(game.players.white && game.players.black),
@@ -196,7 +196,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                     gameId,
                     whitePlayer: game.players.white || null,
                     blackPlayer: game.players.black || null,
-                    stakes: game.stakes.amount,
+                    stakes: game.stakes.amount.toString(), // Convert bigint to string for JSON serialization
                     timeControl: game.timers.timeControl / (60 * 1000),
                     increment: game.timers.increment / 1000,
                     isFull: !!(game.players.white && game.players.black),
@@ -206,4 +206,4 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             })
         });
     });
-}; 
+};

@@ -2,14 +2,16 @@
 
 ## Latest Updates
 
-*   **2025-07-28**: Updated `todo.md` with a new goal-oriented structure, including a detailed plan for the Blockchain Migration to Somnia Network.
+*   **2025-07-29**: Successfully migrated the ChessXCrypto dApp from Avalanche to the Somnia testnet.
+*   **2025-07-29**: Removed all admin-related functions and components from the dApp.
+*   **2025-07-29**: Implemented shared types for frontend and backend, and configured Vite to resolve shared module imports.
 
 ## Current Project Status
 
-**Last Completed:** Phase 4 - Complete on-chain integration and comprehensive game flow
-**Current Working State:** ✅ Fully functional real-time multiplayer chess with complete betting and smart contract integration
-**Build Status:** ✅ Frontend and backend build successfully
-**Next Priority:** Goal 2 - Blockchain Migration to Somnia
+**Last Completed:** Goal 2 - Blockchain Migration to Somnia & Admin Functionality Removal
+**Current Working State:** ✅ Smart contract deployed to Somnia testnet. Backend and frontend configurations updated. Admin functionality removed. Shared types configured.
+**Build Status:** ✅ Contracts build successfully. Frontend and backend should now compile without type errors related to shared modules.
+**Next Priority:** Goal 3 - Advanced Features & Enhancements (Core Chess Game Logic and Management)
 
 ## Development Commands
 
