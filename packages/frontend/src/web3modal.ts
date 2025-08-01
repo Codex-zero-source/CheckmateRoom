@@ -16,8 +16,17 @@ const somnia = {
     chainId: 50312,
     name: 'Somnia Testnet',
     currency: 'STT',
-    explorerUrl: 'https://explorer.somnia.network', // Placeholder, actual explorer URL might differ
-    rpcUrl: 'https://rpc.somnia.network' // Placeholder, actual RPC URL might differ
+    explorerUrl: 'https://explorer.somnia.network',
+    rpcUrl: 'https://dream-rpc.somnia.network',
+    nativeCurrency: {
+        name: 'STT',
+        symbol: 'STT',
+        decimals: 18
+    },
+    contracts: {
+        STT: '0xB0eA5876b0eD682DCf907D41D926Ce5F0F2B44ac',
+        ChessGame: '0x1EB8A3c03D6D7212bC50176cEa0eCc33F5f8a016'
+    }
 }
 
 // 3. Create a metadata object

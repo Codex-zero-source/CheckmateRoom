@@ -2,12 +2,14 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 /**
  * @title ChessGame
- * @dev Manages the state and rewards for chess matches with spectator betting.
+ * @dev Manages the state and rewards for chess matches with spectator betting using native STT.
  */
-contract ChessGame is Ownable {
-
+contract ChessGame is Ownable, ReentrancyGuard, Pausable {
     struct SpectatorBet {
         address spectator;
         uint256 amount;

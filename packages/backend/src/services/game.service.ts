@@ -1,7 +1,11 @@
 import { Chess } from 'chess.js';
 import { Server } from 'socket.io';
+import { type Hash, type TransactionReceipt, parseEther, formatEther } from 'viem';
+import { GameBlockchainService } from './viem.service';
+import { env } from '../config/env';
 
 let io: Server;
+const gameBlockchain = new GameBlockchainService(env.CHESS_GAME_ADDRESS);
 
 export const initGameService = (socketIo: Server) => {
     io = socketIo;
@@ -31,10 +35,21 @@ export interface GameRoom {
     };
     timerInterval: NodeJS.Timeout | null;
     stakes: {
-        amount: bigint;
+        amount: bigint; // Amount in STT (native currency)
         whiteBet: string | null;
         blackBet: string | null;
         isLocked: boolean;
+        transactionHashes: {
+            white?: `0x${string}`;
+            black?: `0x${string}`;
+        };
+    };
+    onChainGameId?: string;
+    contractTransactions?: {
+        whiteBet?: string;
+        blackBet?: string;
+        lockBets?: string;
+        result?: string;
     };
     moveHistory: Array<{
         move: string;

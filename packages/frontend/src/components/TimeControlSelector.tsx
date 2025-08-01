@@ -3,7 +3,7 @@ import { TIME_CONTROL_OPTIONS, STAKES_OPTIONS } from '../config/env';
 import './TimeControlSelector.css';
 
 interface TimeControlSelectorProps {
-    onGameCreate: (timeControl: number, increment: number, stakes: bigint) => void;
+    onGameCreate: (timeControl: number, increment: number, stakes: number) => void;
     isCreating: boolean;
 }
 
@@ -13,14 +13,14 @@ const TimeControlSelector: React.FC<TimeControlSelectorProps> = ({
 }) => {
     const [selectedTimeControl, setSelectedTimeControl] = useState<number>(5);
     const [selectedIncrement, setSelectedIncrement] = useState<number>(0);
-    const [selectedStakes, setSelectedStakes] = useState<bigint>(0n);
+    const [selectedStakes, setSelectedStakes] = useState<number>(0);
 
     const handleTimeControlSelect = (timeControl: number, increment: number) => {
         setSelectedTimeControl(timeControl);
         setSelectedIncrement(increment);
     };
 
-    const handleStakesSelect = (stakes: bigint) => {
+    const handleStakesSelect = (stakes: number) => {
         setSelectedStakes(stakes);
     };
 
@@ -28,9 +28,9 @@ const TimeControlSelector: React.FC<TimeControlSelectorProps> = ({
         onGameCreate(selectedTimeControl, selectedIncrement, selectedStakes);
     };
 
-    const formatStakes = (stakes: bigint): string => {
-        if (stakes === 0n) return 'No Stakes';
-        return `${Number(stakes) / 1e18} MAG`;
+    const formatStakes = (stakes: number): string => {
+        if (stakes === 0) return 'No Stakes';
+        return `${stakes} MAG`;
     };
 
     return (

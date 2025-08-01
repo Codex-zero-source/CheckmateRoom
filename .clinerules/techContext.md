@@ -67,7 +67,7 @@ BACKEND_URL=http://localhost:3001
 
 # Smart Contract Configuration
 SOMNIA_PRIVATE_KEY=ae3c64da340e9288a66413556f76262fcc67bdd827ea65125dbae61468c2d062
-SOMNIA_API_KEY=your_somnia_explorer_api_key # Placeholder, as no specific API key was provided for Somnia explorer
+# Somnia explorer doesn't require an API key
 
 # Contract Addresses (Somnia Testnet)
 CHESS_GAME_ADDRESS=0x1EB8A3c03D6D7212bC50176cEa0eCc33F5f8a016

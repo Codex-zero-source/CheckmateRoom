@@ -26,7 +26,7 @@ const Lobby: React.FC<LobbyProps> = ({ games, onJoinGame, userAccount }) => {
 
   const formatStakes = (stakes: number): string => {
     if (stakes === 0) return 'No stakes';
-    return `${ethers.formatEther(stakes)} MAG`;
+    return `${stakes} MAG`;
   };
 
   const formatAddress = (address: string | null): string => {

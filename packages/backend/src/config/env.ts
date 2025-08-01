@@ -1,16 +1,25 @@
 // Magnus Chess dApp Backend Environment Configuration
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-// Server Configuration
-export const SERVER_PORT = process.env.PORT || 3001;
-export const SERVER_HOST = process.env.HOST || 'localhost';
+export const env = {
+    // Server Configuration
+    SERVER_PORT: process.env.PORT || 3001,
+    SERVER_HOST: process.env.HOST || 'localhost',
 
-// Contract Addresses (Somnia Testnet)
-export const CHESS_GAME_ADDRESS = "0x8BA03d3d164B343DEb8404Ca8dD87236ED11BBfb";
+    // Contract Addresses (Somnia Testnet)
+    CHESS_GAME_ADDRESS: process.env.CHESS_GAME_ADDRESS || "0x1EB8A3c03D6D7212bC50176cEa0eCc33F5f8a016",
 
-// Network Configuration
-export const NETWORK_ID = 50312;
-export const NETWORK_NAME = "Somnia Testnet";
-export const RPC_URL = "https://dream-rpc.somnia.network";
+    // Network Configuration
+    NETWORK_ID: Number(process.env.CHAIN_ID) || 50312,
+    NETWORK_NAME: process.env.NETWORK_NAME || "Somnia Testnet",
+    RPC_URL: process.env.RPC_URL || "https://dream-rpc.somnia.network",
+
+    // Transaction Configuration
+    MINIMUM_CONFIRMATIONS: Number(process.env.MINIMUM_CONFIRMATIONS) || 2,
+    TRANSACTION_TIMEOUT: Number(process.env.TRANSACTION_TIMEOUT) || 60_000, // 60 seconds
+    MAX_RETRIES: Number(process.env.MAX_RETRIES) || 3,
+} as const;
 
 // Database Configuration
 export const DATABASE_URL = process.env.DATABASE_URL;
@@ -47,6 +56,8 @@ export const TIME_CONTROL_OPTIONS = [
 ];
 
 // Stakes Options
+export const { SERVER_PORT, SERVER_HOST } = env;
+
 export const STAKES_OPTIONS = [
     { label: "No Stakes", value: 0 },
     { label: "1 STT", value: 1000000000000000000 }, // 1 STT in wei

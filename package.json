@@ -33,6 +33,9 @@
   "dependencies": {
     "@web3modal/ethers": "^5.1.11",
     "ethers": "^6.14.4",
+    "rate-limiter-flexible": "^7.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "ts-node": "^10.9.2",
     "viem": "^2.33.1"
   }

@@ -38,9 +38,6 @@ export const setUsername = async (req: AuthenticatedRequest, res: Response): Pro
     }
     
     try {
-        // In a real-world scenario, you'd want a more efficient way to check for unique usernames in Redis.
-        // For this example, we'll keep it simple.
-        
         let user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
 
         if (user) {
@@ -53,6 +50,10 @@ export const setUsername = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(200).json({ message: 'Username set successfully!', user: { username: user.username } });
 
     } catch (error: any) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        if (error.message.includes('already taken') || error.message.includes('was taken')) {
+            res.status(409).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
     }
 };

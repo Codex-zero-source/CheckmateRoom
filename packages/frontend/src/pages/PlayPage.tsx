@@ -20,7 +20,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
     const [gameOver, setGameOver] = useState('');
     const [playerColor, setPlayerColor] = useState<'white' | 'black' | null>(null);
     const [lobbyGames, setLobbyGames] = useState<GameInfo[]>([]);
-    const [currentStakes, setCurrentStakes] = useState(0n);
+    const [currentStakes, setCurrentStakes] = useState(0);
     const [isCreatingGame, setIsCreatingGame] = useState(false);
     const [showTimeControlSelector, setShowTimeControlSelector] = useState(false);
     const [connectionState, setConnectionState] = useState(socketService.getConnectionState());
@@ -46,7 +46,10 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         };
     }, []);
 
-    const handleCreateGame = async (timeControl: number, increment: number, stakes: bigint) => {
+    const [selectedTime, setSelectedTime] = useState(5);
+    const [selectedIncrement, setSelectedIncrement] = useState(0);
+
+    const handleCreateGame = async (timeControl: number, increment: number, stakes: number) => {
         if (!chessGameContract || !userAccount) {
             setStatus('Please connect your wallet to create a game.');
             return;
@@ -60,6 +63,8 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
 
         setIsCreatingGame(true);
         setStatus('Creating game on the blockchain...');
+        setSelectedTime(timeControl);
+        setSelectedIncrement(increment);
 
         try {
             // Create game on blockchain first
@@ -84,10 +89,9 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                 });
                 
                 // Set stakes for the game
-                if (stakes > 0n) {
-                    socketService.emit('setStakes', { gameId: newGameId, amount: stakes.toString() });
+                if (stakes > 0) {
+                    socketService.emit('setStakes', { gameId: newGameId, amount: stakes });
                 }
-                
                 setGameId(newGameId);
                 setPlayerColor('white'); // Creator is always white initially
                 setCurrentStakes(stakes);
@@ -154,7 +158,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         setLobbyGames(data.games);
     });
 
-        socketService.on('stakesUpdated', (data: { amount: bigint }) => {
+        socketService.on('stakesUpdated', (data: { amount: number }) => {
         setCurrentStakes(data.amount);
         setStatus('Stakes updated.');
     });
@@ -186,8 +190,8 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                         setGameOver={setGameOver}
                         gameOver={gameOver}
                         playerColor={playerColor}
-                        selectedTime={5}
-                        selectedIncrement={0}
+                        selectedTime={selectedTime}
+                        selectedIncrement={selectedIncrement}
                         currentStakes={currentStakes}
                     />
                     <div className="side-panel">
