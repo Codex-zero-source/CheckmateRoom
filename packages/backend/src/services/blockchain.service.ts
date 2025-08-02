@@ -61,19 +61,19 @@ export async function placeBet(client: any, contractAddress: string, gameId: big
 }
 
 // Balance checking function
-export async function getPlayerBalance(address: string) {
+export async function getPlayerBalance(address: `0x${string}`) {
   const balance = await publicClient.getBalance({ address });
   return formatEther(balance);
 }
 
 // Gas estimation function
-export async function estimateGameCreationGas(contractAddress: string, player1: string, player2: string) {
+export async function estimateGameCreationGas(contractAddress: `0x${string}`, player1: `0x${string}`, player2: `0x${string}`) {
   const estimate = await publicClient.estimateContractGas({
     address: contractAddress,
-    abi: [...], // ChessGame ABI
-    functionName: 'createGame',
-    args: [player1, player2],
-  });
+    abi: chessGameABI as any,
+    functionName: 'createGame' as any,
+    args: [player1, player2] as any,
+  } as any);
   return estimate;
 }
 

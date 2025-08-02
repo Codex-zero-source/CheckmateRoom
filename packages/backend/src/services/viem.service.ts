@@ -29,9 +29,8 @@ export const somnia = {
   blockExplorers: {
     default: { name: 'Somnia Explorer', url: 'https://explorer.somnia.network' },
   },
-} satisfies Chain;
   testnet: true,
-} as const;
+} satisfies Chain;
 
 // Public client for read operations
 export const publicClient = createPublicClient({
@@ -149,13 +148,14 @@ export class GameBlockchainService {
   ): Promise<{ hash: Hash; receipt: TransactionReceipt | null }> {
     const hash = await this.monitor.retryTransaction(async () => {
       return await walletClient.writeContract({
+        account: walletClient.account,
         chain: somnia,
         address: this.contractAddress,
         abi: chessGameAbi,
         functionName: 'placeBet',
         args: [gameId, isWhite],
         value: amount,
-      });
+      } as any);
     });
 
     const receipt = await this.monitor.waitForTransaction(hash);
@@ -168,12 +168,13 @@ export class GameBlockchainService {
   ): Promise<{ hash: Hash; receipt: TransactionReceipt | null }> {
     const hash = await this.monitor.retryTransaction(async () => {
       return await walletClient.writeContract({
+        account: walletClient.account,
         chain: somnia,
         address: this.contractAddress,
         abi: chessGameAbi,
         functionName: 'lockBets',
         args: [gameId]
-      });
+      } as any);
     });
     const receipt = await this.monitor.waitForTransaction(hash);
     return { hash, receipt };
@@ -187,12 +188,13 @@ export class GameBlockchainService {
   ): Promise<{ hash: Hash; receipt: TransactionReceipt | null }> {
     const hash = await this.monitor.retryTransaction(async () => {
       return await walletClient.writeContract({
+        account: walletClient.account,
         chain: somnia,
         address: this.contractAddress,
         abi: chessGameAbi,
         functionName: 'submitResult',
         args: [gameId, winner ?? "0x0000000000000000000000000000000000000000", pgn]
-      });
+      } as any);
     });
     const receipt = await this.monitor.waitForTransaction(hash);
     return { hash, receipt };

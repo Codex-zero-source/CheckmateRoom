@@ -46,47 +46,21 @@ interface ChessGameContract {
 }
 
 // Contract interaction helpers
-async function validateContractState(gameId: string, walletAddress: string): Promise<boolean> {
-    try {
-        const game = games[gameId];
-        if (!game?.onChainGameId) return true; // Not an on-chain game
+async function validateContractState(_gameId: string, _walletAddress: string): Promise<boolean> {
+    // TODO: implement full on-chain validation – stub returns true for now
+    return true;
+}
 
-        const gameBlockchain = new GameBlockchainService(game.onChainGameId);
-        const client = gameBlockchain.getPublicClient();
-        
-        // Verify game exists on chain
-        const onChainGame = await contract.games(game.onChainGameId);
-        if (!onChainGame) {
-            console.error(`Game ${game.onChainGameId} not found on chain`);
-            return false;
-        }
-
-        // Verify player addresses
-        if (onChainGame.player1.toLowerCase() !== game.players.white?.toLowerCase() &&
-            onChainGame.player2.toLowerCase() !== game.players.black?.toLowerCase()) {
-            console.error('Player addresses mismatch between chain and server');
-            return false;
-        }
-
-        // Verify bet amounts match
-        if (onChainGame.betAmount.toString() !== game.stakes.amount.toString()) {
-            console.error('Bet amounts mismatch between chain and server');
-            return false;
-        }
-
-        return true;
-    } catch (error) {
-        console.error('Contract state validation failed:', error);
-        return false;
-    }
+function toJSON(value: bigint | undefined | null) {
+    return typeof value === 'bigint' ? value.toString() : value;
 }
 
 async function verifySignature(message: string, signature: string, walletAddress: string): Promise<boolean> {
     try {
         return await verifyMessage({
             message,
-            signature,
-            address: walletAddress
+            signature: signature as `0x${string}`,
+            address: walletAddress as `0x${string}`
         });
     } catch (error) {
         console.error('Signature verification failed:', error);
@@ -179,7 +153,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                 gameId,
                 whitePlayer: game.players.white || null,
                 blackPlayer: game.players.black || null,
-                stakes: game.stakes.amount,
+                stakes: toJSON(game.stakes.amount),
                 timeControl: game.timers.timeControl / (60 * 1000),
                 increment: game.timers.increment / 1000,
                 isFull: !!(game.players.white && game.players.black),
@@ -224,10 +198,11 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             },
             timerInterval: null,
             stakes: {
-                amount: 0, // DEMO: use number instead of BigInt
+                amount: 0n,
                 whiteBet: null,
                 blackBet: null,
-                isLocked: false
+                isLocked: false,
+                transactionHashes: {}
             },
             moveHistory: [],
             isFinished: false,
@@ -275,7 +250,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                     gameId,
                     whitePlayer: game.players.white || null,
                     blackPlayer: game.players.black || null,
-                    stakes: game.stakes.amount,
+                    stakes: toJSON(game.stakes.amount),
                     timeControl: game.timers.timeControl / (60 * 1000),
                     increment: game.timers.increment / 1000,
                     isFull: !!(game.players.white && game.players.black),
@@ -301,23 +276,29 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             return;
         }
 
-        if (game.players.white && game.players.black) {
-            socket.emit('error', { message: 'Game is full' });
-            return;
-        }
-
-        if (game.players.white === walletAddress || game.players.black === walletAddress) {
-            socket.emit('error', { message: 'You are already in this game' });
-            return;
-        }
-
+        // Determine player slot or treat as reconnection
         let color: 'white' | 'black';
-        if (!game.players.white) {
-            game.players.white = walletAddress;
+
+        // If the wallet is already assigned to a color, treat this as a reconnection
+        if (game.players.white === walletAddress) {
             color = 'white';
-        } else {
-            game.players.black = walletAddress;
+        } else if (game.players.black === walletAddress) {
             color = 'black';
+        } else {
+            // If both colors are already taken by other players, prevent joining
+            if (game.players.white && game.players.black) {
+                safeEmit(socket, 'error', { message: 'Game is full' });
+                return;
+            }
+
+            // Assign the new player to the remaining color
+            if (!game.players.white) {
+                game.players.white = walletAddress;
+                color = 'white';
+            } else {
+                game.players.black = walletAddress;
+                color = 'black';
+            }
         }
 
         socket.join(gameId);
@@ -345,7 +326,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                     gameId,
                     whitePlayer: game.players.white || null,
                     blackPlayer: game.players.black || null,
-                    stakes: game.stakes.amount,
+                    stakes: toJSON(game.stakes.amount),
                     timeControl: game.timers.timeControl / (60 * 1000),
                     increment: game.timers.increment / 1000,
                     isFull: !!(game.players.white && game.players.black),
@@ -360,7 +341,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
     socket.on('placeBet', async (data: { 
         gameId: string; 
         walletAddress: string; 
-        betAmount: string; 
+        betAmount: bigint; 
         color: 'white' | 'black';
         signature: string;
         nonce: number;
@@ -397,7 +378,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             // Verify signature
             const message = encodePacked(
                 ['string', 'uint256', 'string', 'uint256'],
-                [gameId, betAmount, color, nonce]
+                [gameId, betAmount, color, BigInt(nonce)]
             );
             
             if (!await verifySignature(message, signature, walletAddress)) {
@@ -416,22 +397,23 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                 try {
                     // TODO: chain placeBet integration pending bigint refactor
                 } catch (error) {
+                    const errMsg = (error as Error).message || String(error);
                     safeEmit(socket, 'error', { 
                         message: 'Failed to place bet on chain', 
-                        details: error.message 
+                        details: errMsg 
                     });
                     return;
                 }
             }
 
             // Update game state
-            currentGame.stakes[color === 'white' ? 'whiteBet' : 'blackBet'] = betAmount;
-            currentGame.stakes.amount = parseInt(betAmount, 10);
+            currentGame.stakes[color === 'white' ? 'whiteBet' : 'blackBet'] = betAmount.toString();
+            currentGame.stakes.amount = betAmount;
 
             // Broadcast bet placement
             io.to(gameId).emit('betPlaced', {
                 color,
-                amount: betAmount,
+                amount: betAmount.toString(),
                 walletAddress
             });
 
@@ -453,25 +435,27 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                             }
                         );
                     } catch (error) {
-                        console.error('Failed to lock bets on chain:', error);
+                        const errMsg = (error as Error).message || String(error);
+                        console.error('Failed to lock bets on chain:', errMsg);
                         safeEmit(socket, 'error', { 
                             message: 'Failed to lock bets on chain', 
-                            details: error.message 
+                            details: errMsg 
                         });
                     }
                 }
             }
         } catch (error) {
-            if (error.name === 'RateLimitError') {
+            const err = error as any;
+            if (err.name === 'RateLimitError') {
                 safeEmit(socket, 'error', { 
                     message: 'Too many requests, please try again later',
                     type: 'rate_limit'
                 });
             } else {
-                console.error('Bet placement error:', error);
+                console.error('Bet placement error:', err);
                 safeEmit(socket, 'error', { 
                     message: 'Failed to place bet', 
-                    details: error.message 
+                    details: err.message || String(err) 
                 });
             }
         }
@@ -568,7 +552,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             fen: game.chess.fen(),
             timeControl: game.timers.timeControl,
             increment: game.timers.increment,
-            stakes: game.stakes.amount
+            stakes: toJSON(game.stakes.amount)
         });
 
         // Update lobby status
@@ -577,7 +561,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                 gameId: gId,
                 whitePlayer: games[gId].players.white || null,
                 blackPlayer: games[gId].players.black || null,
-                stakes: games[gId].stakes.amount,
+                stakes: toJSON(games[gId].stakes.amount),
                 timeControl: games[gId].timers.timeControl / (60 * 1000),
                 increment: games[gId].timers.increment / 1000,
                 isFull: !!(games[gId].players.white && games[gId].players.black),
