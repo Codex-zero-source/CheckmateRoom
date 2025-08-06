@@ -31,7 +31,8 @@ interface GameProps {
 }
 
 // A dummy opponent for demonstration purposes
-const DUMMY_OPPONENT_ADDRESS = "0x000000000000000000000000000000000000dEaD";
+// Zero address indicates open slot for second player
+const DUMMY_OPPONENT_ADDRESS = ethers.ZeroAddress;
 
 export default function Game({ 
   socket,

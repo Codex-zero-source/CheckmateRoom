@@ -8,7 +8,20 @@ import { activeConnections } from '../services/connection.service';
 import { createPublicClient, createWalletClient, http, verifyMessage, encodePacked } from 'viem';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { chessGameABI } from '../config/chessGameABI';
+import { joinGame as joinGameOnChain, createGame as createGameOnChain } from '../services/blockchain.service';
 import { GameBlockchainService } from '../services/viem.service';
+import { createClient } from 'redis';
+import { DATABASE_URL } from '../config/env';
+
+const redisClient = createClient({ url: DATABASE_URL });
+redisClient.on('error', (err) => console.error('Redis Client Error', err));
+(async () => {
+    try {
+        await redisClient.connect();
+    } catch (err) {
+        console.error('Redis connect error', err);
+    }
+})();
 
 // Type definitions for contract interactions
 interface OnChainGame {
@@ -146,8 +159,35 @@ function generateUniqueGameId(): string {
 
 export const registerGameHandlers = (io: Server, socket: Socket) => {
     // Get lobby games
-    socket.on('getLobby', () => {
-        const lobbyGames = Object.keys(games).map(gameId => {
+    socket.on('getLobby', async () => {
+        // Combine in-memory games with persisted Redis games (for multi-node setups)
+        let lobbyGames: any[] = [];
+        try {
+            const redisIds = await redisClient.sMembers('activeGames');
+            for (const id of redisIds) {
+                if (games[id]) continue; // already in memory
+                const raw = await redisClient.get(`game:${id}`);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    lobbyGames.push({
+                        gameId: parsed.gameId,
+                        whitePlayer: parsed.whitePlayer || null,
+                        blackPlayer: parsed.blackPlayer || null,
+                        stakes: parsed.stakes || '0',
+                        timeControl: parsed.timeControl,
+                        increment: parsed.increment,
+                        isFull: !!(parsed.whitePlayer && parsed.blackPlayer),
+                        isStarted: false,
+                        spectatorCount: 0
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch lobby from Redis:', err);
+        }
+
+        // Add local in-memory games
+        lobbyGames = lobbyGames.concat(Object.keys(games).map(gameId => {
             const game = games[gameId];
             return {
                 gameId,
@@ -160,7 +200,7 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
                 isStarted: game.timers.activePlayer !== null,
                 spectatorCount: game.spectators.length
             };
-        });
+        }));
         safeEmit(socket, 'lobbyUpdate', { games: lobbyGames });
     });
 
@@ -210,11 +250,29 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
             chatMessages: [],
             typingUsers: new Set(),
             lastActivity: Date.now(),
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            onChainGameId: onChainGameId || null
         };
         
         if (!onChainGameId) {
             activeGameIds.add(newId);
+        }
+
+        // Persist newly created game to Redis
+        try {
+            await redisClient.set(`game:${newId}`, JSON.stringify({
+                gameId: newId,
+                whitePlayer: creatorColor === 'white' ? walletAddress : null,
+                blackPlayer: creatorColor === 'black' ? walletAddress : null,
+                timeControl,
+                increment,
+                stakes: games[newId].stakes.amount.toString(),
+                isFinished: false,
+                createdAt: games[newId].createdAt
+            }));
+            await redisClient.sAdd('activeGames', newId);
+        } catch (err) {
+            console.error('Failed to persist game to Redis:', err);
         }
         
         socket.join(newId);
@@ -262,8 +320,15 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
     });
 
     // Join a game
-    socket.on('joinGame', (data) => {
-        const { gameId, walletAddress } = data;
+    socket.on('joinGame', async (data) => {
+        let { gameId, walletAddress } = data as { gameId: string; walletAddress?: string };
+        if (!walletAddress) {
+            walletAddress = (socket as any).walletAddress;
+        }
+        if (!walletAddress) {
+            safeEmit(socket, 'error', { message: 'Wallet must be connected' });
+            return;
+        }
         const game = games[gameId];
         
         if (!game) {
@@ -312,11 +377,26 @@ export const registerGameHandlers = (io: Server, socket: Socket) => {
         }
         
         console.log(`${walletAddress} joined game ${gameId} as ${color}`);
+
+        // Update Redis record with current players
+        try {
+            const gameKey = `game:${gameId}`;
+            const existing = await redisClient.get(gameKey);
+            if (existing) {
+                const parsed = JSON.parse(existing);
+                parsed.whitePlayer = game.players.white || null;
+                parsed.blackPlayer = game.players.black || null;
+                await redisClient.set(gameKey, JSON.stringify(parsed));
+            }
+        } catch (err) {
+            console.error('Failed to update game in Redis:', err);
+        }
         
         safeEmit(io, 'gameJoined', { 
             gameId, 
             color, 
-            walletAddress 
+            walletAddress,
+            timeControl: game.timers.timeControl
         });
 
         safeEmit(io, 'lobbyUpdate', {

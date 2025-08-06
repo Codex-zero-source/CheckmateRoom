@@ -133,11 +133,15 @@ export function startTimer(gameId: string) {
         }
 
         const timerUpdate = {
-            white: game.timers.white,
-            black: game.timers.black,
+            whiteTime: game.timers.white,
+            blackTime: game.timers.black,
             activePlayer: game.timers.activePlayer
-        };
-        timerUpdate[activeColor] = remainingTime;
+        } as { whiteTime: number; blackTime: number; activePlayer: 'white' | 'black' | null };
+        if (activeColor === 'white') {
+            timerUpdate.whiteTime = remainingTime;
+        } else {
+            timerUpdate.blackTime = remainingTime;
+        }
 
         io.to(gameId).emit('timerUpdate', timerUpdate);
     }, 100);

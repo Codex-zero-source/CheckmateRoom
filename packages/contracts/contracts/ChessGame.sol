@@ -44,12 +44,13 @@ contract ChessGame is Ownable, ReentrancyGuard, Pausable {
 
     event GameCreated(uint256 gameId, address player1, address player2);
     event GameFinished(uint256 gameId, address winner);
+    event PlayerJoined(uint256 gameId, address player2);
     event BetPlaced(uint256 gameId, address player, uint256 amount);
     event SpectatorBetPlaced(uint256 gameId, address spectator, uint256 amount, bool isWhite);
     event BetsLocked(uint256 gameId);
     event SpectatorRewardsDistributed(uint256 gameId, uint256 totalWhiteBets, uint256 totalBlackBets);
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor() {}
 
     /**
      * @dev Creates a new game.
@@ -70,6 +71,20 @@ contract ChessGame is Ownable, ReentrancyGuard, Pausable {
 
         emit GameCreated(nextGameId, player1, player2);
         nextGameId++;
+    }
+
+    /**
+     * @dev Allows a second player to join an existing game that has an empty player2 slot.
+     */
+    function joinGame(uint256 gameId) public {
+        Game storage game = games[gameId];
+        require(game.player2 == address(0), "Game already has two players");
+        require(msg.sender != game.player1, "Creator cannot join as player2");
+        require(!game.isFinished, "Game is already finished");
+
+        game.player2 = msg.sender;
+
+        emit PlayerJoined(gameId, msg.sender);
     }
 
     /**

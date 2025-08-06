@@ -56,8 +56,6 @@ export const TIME_CONTROL_OPTIONS = [
 ];
 
 // Stakes Options
-export const { SERVER_PORT, SERVER_HOST } = env;
-
 export const STAKES_OPTIONS = [
     { label: "No Stakes", value: 0 },
     { label: "1 STT", value: 1000000000000000000 }, // 1 STT in wei

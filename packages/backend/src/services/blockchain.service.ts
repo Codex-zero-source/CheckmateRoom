@@ -49,6 +49,16 @@ export async function createGame(client: any, contractAddress: string, player1: 
   return hash;
 }
 
+export async function joinGame(client: any, contractAddress: string, gameId: bigint) {
+  const hash = await client.writeContract({
+    address: contractAddress,
+    abi: chessGameABI, // ChessGame ABI
+    functionName: 'joinGame',
+    args: [gameId],
+  });
+  return hash;
+}
+
 export async function placeBet(client: any, contractAddress: string, gameId: bigint, isWhite: boolean) {
   const hash = await client.writeContract({
     address: contractAddress,

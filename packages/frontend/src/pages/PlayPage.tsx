@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Contract } from 'ethers';
 import socketService from '../services/socketService';
 import Game from '../components/Chessboard';
@@ -24,6 +25,28 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
     const [isCreatingGame, setIsCreatingGame] = useState(false);
     const [showTimeControlSelector, setShowTimeControlSelector] = useState(false);
     const [connectionState, setConnectionState] = useState(socketService.getConnectionState());
+
+    // React-router helpers for updating the URL
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    // Keep URL in sync with current gameId
+    useEffect(() => {
+        if (gameId) {
+            navigate(`/play?gameId=${gameId}`, { replace: true });
+        }
+    }, [gameId, navigate]);
+
+    // On first load, if ?gameId= is present, initialise it
+    useEffect(() => {
+        const paramGameId = searchParams.get('gameId');
+        if (paramGameId && !gameId) {
+            setGameId(paramGameId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
 
     // Monitor connection state
     useEffect(() => {
@@ -68,7 +91,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
 
         try {
             // Create game on blockchain first
-            const dummyOpponent = "0x000000000000000000000000000000000000dEaD";
+            const dummyOpponent = ethers.ZeroAddress;
             const tx = await chessGameContract.createGame(userAccount, dummyOpponent);
             const receipt = await tx.wait();
             
@@ -93,7 +116,8 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
                     socketService.emit('setStakes', { gameId: newGameId, amount: stakes });
                 }
                 setGameId(newGameId);
-                setPlayerColor('white'); // Creator is always white initially
+                navigate(`/play?gameId=${newGameId}`, { replace: true });
+                // playerColor will be set from server event
                 setCurrentStakes(stakes);
                 setStatus(`Game #${newGameId} created! Waiting for opponent to join...`);
                 setShowTimeControlSelector(false);
@@ -108,7 +132,7 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         }
     };
 
-    const handleJoinFromLobby = (gameId: string) => {
+    const handleJoinFromLobby = async (gameId: string) => {
         if (!userAccount) {
             setStatus('Please connect your wallet before joining a game.');
             return;
@@ -117,6 +141,18 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         if (!socketService.isConnected()) {
             setStatus('Connecting to server...');
             // The connection is now handled by App.tsx
+            return;
+        }
+
+        setStatus('Joining game on-chain...');
+        try {
+            if (chessGameContract) {
+                const tx = await chessGameContract.joinGame(BigInt(gameId));
+                await tx.wait();
+            }
+        } catch (error) {
+            console.error('Chain join error:', error);
+            setStatus('Failed to join game on-chain.');
             return;
         }
 
@@ -138,9 +174,11 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
     // Socket event listeners
     useEffect(() => {
         socketService.on('gameJoined', (data: { gameId: string; color: 'white' | 'black' }) => {
-        setPlayerColor(data.color);
-        setStatus(`Joined game ${data.gameId} as ${data.color}. ${data.color === 'white' ? 'You go first!' : 'Waiting for white to move...'}`);
-    });
+            setGameId(data.gameId);
+            navigate(`/play?gameId=${data.gameId}`, { replace: true });
+            setPlayerColor(data.color);
+            setStatus(`Joined game ${data.gameId} as ${data.color}. ${data.color === 'white' ? 'You go first!' : 'Waiting for white to move...'}`);
+        });
 
         socketService.on('error', (data: { message: string }) => {
         setStatus(`Error: ${data.message}`);
@@ -163,8 +201,11 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
         setStatus('Stakes updated.');
     });
 
-        socketService.on('gameCreated', (data: { gameId: string }) => {
-            setStatus(`Game ${data.gameId} created successfully!`);
+        socketService.on('gameCreated', (data: { gameId: string; color: 'white' | 'black' }) => {
+            setGameId(data.gameId);
+            navigate(`/play?gameId=${data.gameId}`, { replace: true });
+            setPlayerColor(data.color);
+            setStatus(`Game ${data.gameId} created successfully as ${data.color}!`);
         });
 
         return () => {
@@ -175,7 +216,35 @@ const PlayPage = ({ chessGameContract, userAccount }: PlayPageProps) => {
             socketService.off('stakesUpdated');
             socketService.off('gameCreated');
         };
-    }, []);
+    }, [navigate]);
+
+    // Robust auto-join: after listeners registered *and* on every reconnect
+    useEffect(() => {
+        const attemptJoin = () => {
+            if (
+                gameId &&
+                userAccount &&
+                socketService.isConnected() &&
+                !playerColor // skip if already assigned
+            ) {
+                socketService.emit('joinGame', { gameId, walletAddress: userAccount });
+                setStatus(`Joining game ${gameId}...`);
+            }
+        };
+
+        // run once after first mount
+        attemptJoin();
+
+        // re-attempt on each connection state change
+        const handleState = (state: any) => {
+            if (state === 'connected') attemptJoin();
+        };
+        socketService.onConnectionStateChange(handleState);
+
+        return () => {
+            socketService.offConnectionStateChange(handleState);
+        };
+    }, [gameId, userAccount, playerColor]);
 
     return (
         <div className="main-content">
